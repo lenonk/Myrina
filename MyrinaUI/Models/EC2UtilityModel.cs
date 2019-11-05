@@ -38,7 +38,7 @@ namespace MyrinaUI.Models {
             DescribeAvailabilityZonesResponse resp = await client.DescribeAvailabilityZonesAsync(req);
 
             foreach (AvailabilityZone zone in resp.AvailabilityZones) {
-                if (!_zones.Contains(zone.ZoneName))
+                if (!_zones.Contains(zone.ZoneName) && zone.State.ToString() == "available")
                     _zones.Add(zone.ZoneName);
             }
 

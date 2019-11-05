@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="MyrinaUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Myrina" Height="550" Width="1000">
+        Title="Myrina" Height="550" Width="1025" MinHeight="550" MinWidth="1025">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -49,11 +49,19 @@
         <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="0" Grid.Column="0" 
                   Items="{Binding EC2AvailabilityZones}" 
                   SelectedIndex="0"/>
-                  <!--SelectedItem="{Binding SelectedAvailabilityZone}">-->
         
         <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="0" Grid.Column="1" 
                   Items="{Binding EC2InstanceTypes}"
                   SelectedItem="{Binding InstanceTypeIdx}" />
+
+        <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="1" Grid.Column="0" 
+                  Items="{Binding EC2InstanceTypes}"
+                  SelectedItem="{Binding InstanceTypeIdx}" />
+
+        <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="1" Grid.Column="1" >
+          <DropDownItem IsSelected="True" Content="Threat" />
+        </DropDown>
+
         <Button MinHeight="30" Margin="4,0,0,4" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
                 Content="Launch" Command="{Binding LaunchEC2Instance}" />
       </Grid>
