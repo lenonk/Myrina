@@ -1,0 +1,62 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MyrinaUI.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Myrina" Height="550" Width="1000">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid
+      ColumnDefinitions="10, auto, auto, auto, auto, *, 10"
+      RowDefinitions="auto, auto, auto, auto, auto, auto, auto, 10">
+
+      <!-- Row 0 -->
+      <Button Grid.Row="0"
+              Grid.Column="1"
+              Grid.ColumnSpan="4"
+              MinHeight="30"
+              Margin="4,4,4,0"
+              Content="Refresh"
+              Command="{Binding RefreshEC2Instances}" />
+
+      <!-- Row 1 -->
+      <ScrollViewer Grid.Row="1"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="4"
+                    Margin="4,4,4,0"
+                    HorizontalScrollBarVisibility="Auto">
+        <DataGrid 
+          VerticalAlignment="Top"
+          HorizontalAlignment="Left"
+          IsReadOnly="True" 
+          AutoGenerateColumns="True" 
+          Items="{Binding EC2Instances}" />
+      </ScrollViewer>
+
+      <!-- Row 0 Col 5 -->
+      <Grid 
+        Grid.Row="0" 
+        Grid.Column="5"
+        Grid.RowSpan="7"
+        ColumnDefinitions="*, *"
+        RowDefinitions="auto, auto, auto">
+        <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="0" Grid.Column="0" 
+                  Items="{Binding EC2AvailabilityZones}" 
+                  SelectedIndex="0"/>
+                  <!--SelectedItem="{Binding SelectedAvailabilityZone}">-->
+        
+        <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="0" Grid.Column="1" 
+                  Items="{Binding EC2InstanceTypes}"
+                  SelectedItem="{Binding InstanceTypeIdx}" />
+        <Button MinHeight="30" Margin="4,0,0,4" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                Content="Launch" Command="{Binding LaunchEC2Instance}" />
+      </Grid>
+     
+    </Grid>
+</Window>
