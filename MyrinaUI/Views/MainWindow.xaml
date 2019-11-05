@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="MyrinaUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Myrina" Height="550" Width="1025" MinHeight="550" MinWidth="1025">
+        Title="Myrina" Height="550" Width="1050" MinHeight="550" MinWidth="1050">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
