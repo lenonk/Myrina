@@ -5,13 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MyrinaUI.Models {
     static public class EC2UtilityModel {
         static string AccessKey = "AKIAVUTLF6PF7KZOCUQE";
         static string SecretKey = "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";
 
-        static public async void GetEC2InstanceTypes(ObservableCollection<string> col) {
+        static public async Task GetEC2InstanceTypes(ObservableCollection<string> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             List<string> _types = new List<string>();
 
@@ -28,7 +29,7 @@ namespace MyrinaUI.Models {
             _types.ForEach(x => col.Add(x));
         }
 
-        static public async void GetEC2AvailabilityZones(ObservableCollection<string> col) {
+        static public async Task GetEC2AvailabilityZones(ObservableCollection<string> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             List<string> _zones = new List<string>();
 
@@ -47,7 +48,7 @@ namespace MyrinaUI.Models {
             _zones.ForEach(x => col.Add(x));
         }
 
-        static public async void GetEC2Instances(ObservableCollection<EC2InstanceModel> col) {
+        static public async Task GetEC2Instances(ObservableCollection<EC2InstanceModel> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             bool done = false;
 
