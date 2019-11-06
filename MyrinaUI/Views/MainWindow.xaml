@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="MyrinaUI.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Myrina" Height="550" Width="1060" MinHeight="550" MinWidth="1060">
+        Icon="/Assets/avalonia-logo.ico" Name="mainWindow"
+        Title="Myrina" Height="550" Width="1120" MinHeight="550" MinWidth="1120">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -54,9 +54,15 @@
                   Items="{Binding EC2InstanceTypes}"
                   SelectedItem="{Binding SInstanceType, Mode=TwoWay}" />
 
-        <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="1" Grid.Column="0" 
-                  Items="{Binding EC2InstanceTypes}"
-                  SelectedItem="{Binding InstanceTypeIdx}" />
+        <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="1" Grid.Column="0"
+                  Items="{Binding EC2Subnets}"
+                  SelectedItem="{Binding SSubnet, Mode=TwoWay}">
+          <DropDown.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding SubnetId}" />
+            </DataTemplate>
+          </DropDown.ItemTemplate>
+        </DropDown>
 
         <DropDown Margin="4,4,0,4" MinWidth="100" Grid.Row="1" Grid.Column="1"
                   Items="{Binding EC2Amis}"

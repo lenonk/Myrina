@@ -1,6 +1,7 @@
 ﻿using Amazon;
 using Amazon.EC2;
 using Amazon.EC2.Model;
+using MsgBox;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,21 @@ namespace MyrinaUI.Models {
     static public class EC2UtilityModel {
         static string AccessKey = "AKIAVUTLF6PF7KZOCUQE";
         static string SecretKey = "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";
+
+        static public async Task LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
+            string SSubnet, string SAmi) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+
+            RunInstancesRequest req = new RunInstancesRequest();
+            req.Placement.AvailabilityZone = SAvailabilityZone;
+            req.InstanceType = SInstanceType;
+            req.SubnetId = SSubnet;
+            req.ImageId = SAmi;
+            RunInstancesResponse resp = await client.RunInstancesAsync(req);
+            
+            for (int i = 0; i < 2; i++) {
+            }
+        }
 
         static public async Task GetEC2InstanceTypes(ObservableCollection<string> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
@@ -50,9 +66,9 @@ namespace MyrinaUI.Models {
 
         static public async Task GetEC2Instances(ObservableCollection<EC2InstanceModel> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            List<EC2InstanceModel> _instances = new List<EC2InstanceModel>();
             bool done = false;
 
-            col.Clear();
             DescribeInstancesRequest req = new DescribeInstancesRequest();
             while (!done) {
                 DescribeInstancesResponse resp = await client.DescribeInstancesAsync(req);
@@ -64,7 +80,7 @@ namespace MyrinaUI.Models {
                             if (tag.Key == "Name")
                                 name = tag.Value;
                         }
-                        col.Add(new EC2InstanceModel {
+                        _instances.Add(new EC2InstanceModel {
                             Name = name,
                             Id = instance.InstanceId,
                             Type = instance.InstanceType,
@@ -78,6 +94,29 @@ namespace MyrinaUI.Models {
                 if (resp.NextToken == null)
                     done = true;
             }
+
+            col.Clear();
+            _instances.ForEach(x => col.Add(x));
+        }
+        static public async Task GetEC2Subnets(ObservableCollection<EC2SubnetModel> col) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            List<EC2SubnetModel> _subnets = new List<EC2SubnetModel>();
+
+            DescribeSubnetsRequest req = new DescribeSubnetsRequest();
+            DescribeSubnetsResponse resp = await client.DescribeSubnetsAsync();
+
+            foreach (Subnet subnet in resp.Subnets) {
+                _subnets.Add(new EC2SubnetModel { 
+                    AvailabiltyZone = subnet.AvailabilityZone,
+                    CidrBlock = subnet.CidrBlock,
+                    OwnerId = subnet.OwnerId,
+                    SubnetId = subnet.SubnetId,
+                    VpcId = subnet.VpcId
+                });
+            }
+
+            col.Clear();
+            _subnets.ForEach(x => col.Add(x));
         }
     }
 }
