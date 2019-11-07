@@ -1,3 +1,5 @@
+using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -23,13 +25,18 @@ namespace MsgBox {
             AvaloniaXamlLoader.Load(this);
         }
 
+        public static void Show(string text) {
+            Show(null, text, "", MessageBoxButtons.Ok);
+        }
+
         public static Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons) {
             var msgbox = new MessageBox() {
                 Title = title
             };
-            msgbox.FindControl<TextBlock>("Text").Text = text;
-            var buttonPanel = msgbox.FindControl<StackPanel>("Buttons");
 
+            msgbox.FindControl<TextBlock>("Text").Text = text;
+
+            var buttonPanel = msgbox.FindControl<StackPanel>("Buttons");
             var res = MessageBoxResult.Ok;
 
             void AddButton(string caption, MessageBoxResult r, bool def = false) {
@@ -41,6 +48,7 @@ namespace MsgBox {
                 buttonPanel.Children.Add(btn);
                 if (def)
                     res = r;
+                btn.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
             }
 
             if (buttons == MessageBoxButtons.Ok || buttons == MessageBoxButtons.OkCancel)
@@ -58,6 +66,7 @@ namespace MsgBox {
             if (parent != null)
                 msgbox.ShowDialog(parent);
             else msgbox.Show();
+            //msgbox.HandleResized(msgbox.ClientSize.WithHeight(msgbox.ClientSize.Height + 1));
             return tcs.Task;
         }
     }

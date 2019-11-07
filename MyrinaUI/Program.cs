@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Logging.Serilog;
 using MyrinaUI.ViewModels;
 using MyrinaUI.Views;
-using ReactiveUI;
 
 namespace MyrinaUI
 {

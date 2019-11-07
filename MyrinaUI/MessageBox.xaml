@@ -2,17 +2,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="MsgBox.MessageBox" SizeToContent="WidthAndHeight" CanResize="False">
-    <StackPanel HorizontalAlignment="Center">
-        <TextBlock HorizontalAlignment="Center" Name="Text"/>
-        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Name="Buttons">
+        mc:Ignorable="d" d:DesignWidth="405" d:DesignHeight="200" MaxWidth="405"
+        x:Class="MsgBox.MessageBox" SizeToContent="WidthAndHeight" CanResize="True">
+    <Grid Name="Grid" 
+        ColumnDefinitions="*"
+        RowDefinitions="*, auto">
+        <TextBlock 
+            Margin="10,25,10,25" Grid.Row="0" Grid.Column="0" 
+            TextWrapping="Wrap" 
+            HorizontalAlignment="Left" 
+            Name="Text" />
+        <Border Grid.Row="1" Grid.Column = "0" Background="{StaticResource ThemeControlHighBrush}" />
+        <StackPanel Grid.Row="1" Grid.Column="0" 
+                    Background="{StaticResource ThemeControlHighBrush}" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Name="Buttons"> 
             <StackPanel.Styles>
                 <Style Selector="Button">
-                    <Setter Property="Margin" Value="5"/>
+                    <Setter Property="Margin" Value="2,5,2,5"/>
                 </Style>
             </StackPanel.Styles>
-
-        </StackPanel>
     </StackPanel>
+  </Grid>
 </Window>

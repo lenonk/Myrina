@@ -7,14 +7,14 @@ using System.Text;
 using MyrinaUI.Models;
 using ReactiveUI;
 using System.Threading.Tasks;
-using System.Timers;
 using MsgBox;
+using Avalonia.Threading;
 
 namespace MyrinaUI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private Timer _refreshTimer = new Timer(1000);
+        private DispatcherTimer _refreshTimer = new DispatcherTimer();
 
         public ObservableCollection<EC2InstanceModel> EC2Instances { get; }
 
@@ -55,8 +55,9 @@ namespace MyrinaUI.ViewModels
 
             RefreshEC2AllData().ContinueWith(_ => InitializeComboBoxes());
 
-            /*_refreshTimer.Elapsed += (sender, e) => { RefreshEC2AllData(); };
-            _refreshTimer.Start();*/
+            _refreshTimer.Interval = TimeSpan.FromSeconds(10);
+            _refreshTimer.Tick += async (sender, e) => { await RefreshEC2Instances(); };
+            _refreshTimer.Start();
         }
 
         public void InitializeComboBoxes() {
@@ -83,8 +84,6 @@ namespace MyrinaUI.ViewModels
         }
 
         public async Task RefreshEC2AllData() {
-
-            //await MessageBox.Show(Avalonia.Application.Current.MainWindow, "Test", "Test Title", MessageBox.MessageBoxButtons.Ok);
             await EC2UtilityModel.GetEC2Instances(EC2Instances);
             await EC2UtilityModel.GetEC2AvailabilityZones(EC2AvailabilityZones);
             await EC2UtilityModel.GetEC2InstanceTypes(EC2InstanceTypes);
@@ -103,7 +102,7 @@ namespace MyrinaUI.ViewModels
 
         public async Task LaunchEC2Instance() {
             // TODO:  Report the info for the started instance back to the user
-            await EC2UtilityModel.LaunchEC2Instance(SAvailabilityZone, SInstanceType, SSubnet.SubnetId, SAmi.Name);
+            await EC2UtilityModel.LaunchEC2Instance(SAvailabilityZone, SInstanceType, SSubnet.SubnetId, SAmi.Value);
         }
     }
 }

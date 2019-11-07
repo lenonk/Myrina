@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
     <ApplicationIcon />
-    <StartupObject />
+    <StartupObject>MyrinaUI.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
