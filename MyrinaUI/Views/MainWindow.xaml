@@ -3,47 +3,53 @@
         xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1120" d:DesignHeight="850"
         x:Class="MyrinaUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico" Name="mainWindow"
-        Title="Myrina" Height="550" Width="1120">
+        WindowStartupLocation="CenterScreen"
+        Title="Myrina" Height="850" Width="1120" MinWidth="1120">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     <Grid
       ColumnDefinitions="10, auto, *, 10"
-      RowDefinitions="*, 150, 10">
+      RowDefinitions="auto, *, 200, 10">
+
 
       <!-- Row 0 Col 1-->
-      <ScrollViewer Grid.Row="0"
+      <Button Grid.Row="0"
+              Grid.Column="1"
+              MinHeight="30"
+              Margin="4,4,4,0"
+              Content="Refresh"
+              Command="{Binding RefreshEC2Instances}" />
+
+      <ScrollViewer Grid.Row="1"
                     Grid.Column="1"
                     Margin="4,4,4,0"
                     HorizontalScrollBarVisibility="Auto">
-        <DataGrid 
-          SelectionMode="Single"
+        <DataGrid Name="instanceGrid"
           VerticalAlignment="Top"
           HorizontalAlignment="Left"
-          IsReadOnly="True" 
-          AutoGenerateColumns="True" 
-          Items="{Binding EC2Instances}" />
+          IsReadOnly="True"
+          AutoGenerateColumns="True"
+          SelectedItem="{Binding SInstance, Mode=OneWayToSource}"
+          Items="{Binding EC2Instances}">
+        </DataGrid>
       </ScrollViewer>
 
       <!-- Row 5 Col 0-->
-      <TabControl Margin="2,4,0,0" Grid.Row="1" Grid.Column="1">
+      <TabControl Margin="2,4,0,0" Grid.Row="2" Grid.Column="1" DataContext="{Binding SInstance}">
         <TabItem Header="Description">
-          <Grid ColumnDefinitions="*,*" RowDefinitions="auto, auto, auto, auto, auto">
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Availability Zone" />
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Availability Zone" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Availability Zone" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Availability Zone" />
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Availability Zone" />
-
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="Availability Zone" />
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="Availability Zone" />
-            <TextBlock Grid.Row="2" Grid.Column="1" Text="Availability Zone" />
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="Availability Zone" />
-            <TextBlock Grid.Row="4" Grid.Column="1" Text="Availability Zone" />
+          <Grid ColumnDefinitions="auto,auto,auto,*" RowDefinitions="auto, auto, auto, auto, auto">
+            <!-- Instance ID -->
+            <TextBlock Margin="10,10,10,10" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="Instance ID:" />
+            <TextBlock Margin="10,10,10,10" Grid.Row="0" Grid.Column="1" Text="{Binding Id}" />
+            
+            <!-- Public DNS -->
+            <TextBlock Margin="10,10,10,10" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Text="Public DNS:" />
+            <TextBlock Margin="10,10,10,10" Grid.Row="0" Grid.Column="3" Text="{Binding _instance.PublicDnsName}" />
           </Grid>
         </TabItem>
         <TabItem Header="Status Checks"/>
@@ -55,6 +61,7 @@
       <Grid 
         Grid.Row="0" 
         Grid.Column="2"
+        Grid.RowSpan="2"
         ColumnDefinitions="*, *"
         RowDefinitions="auto, auto, auto">
         <ComboBox Margin="4,4,0,4" MinWidth="100" Grid.Row="0" Grid.Column="0" 

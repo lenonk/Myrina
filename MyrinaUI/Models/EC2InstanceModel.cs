@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Amazon.EC2.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,5 +10,8 @@ namespace MyrinaUI.Models {
         public string Type { get; set; }
         public string AvailabilityZone { get; set; }
         public string State { get; set; }
+
+        protected internal Instance _instance { get; set; }
+        
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
     <ApplicationIcon />
     <StartupObject>MyrinaUI.Program</StartupObject>
   </PropertyGroup>
@@ -19,7 +19,7 @@
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.8.3" />
     <PackageReference Include="Avalonia.Desktop" Version="0.8.3" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.3" />
-    <PackageReference Include="AWSSDK.Core" Version="3.3.103.58" />
-    <PackageReference Include="AWSSDK.EC2" Version="3.3.134.5" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.103.60" />
+    <PackageReference Include="AWSSDK.EC2" Version="3.3.134.7" />
   </ItemGroup>
 </Project>

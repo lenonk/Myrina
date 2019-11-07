@@ -107,7 +107,8 @@ namespace MyrinaUI.Models {
                                 Id = instance.InstanceId,
                                 Type = instance.InstanceType,
                                 AvailabilityZone = instance.Placement.AvailabilityZone,
-                                State = instance.State.Name
+                                State = instance.State.Name,
+                                _instance = instance
                             });
                         }
                     }

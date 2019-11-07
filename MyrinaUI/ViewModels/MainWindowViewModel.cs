@@ -1,22 +1,20 @@
-﻿using Avalonia.Input;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.ObjectModel;
 using MyrinaUI.Models;
 using ReactiveUI;
 using System.Threading.Tasks;
 using MsgBox;
-using Avalonia.Threading;
+using Avalonia.Controls;
 
 namespace MyrinaUI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private DispatcherTimer _refreshTimer = new DispatcherTimer();
-
         public ObservableCollection<EC2InstanceModel> EC2Instances { get; }
+        private EC2InstanceModel _sInstance;
+        public EC2InstanceModel SInstance {
+            get { return _sInstance; }
+            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
+        }
 
         public ObservableCollection<string> EC2InstanceTypes { get; }
         private string _sInstanceType;
@@ -54,10 +52,6 @@ namespace MyrinaUI.ViewModels
             EC2Subnets = new ObservableCollection<EC2SubnetModel>();
 
             RefreshEC2AllData().ContinueWith(_ => InitializeComboBoxes());
-
-            _refreshTimer.Interval = TimeSpan.FromSeconds(10);
-            _refreshTimer.Tick += async (sender, e) => { await RefreshEC2Instances(); };
-            _refreshTimer.Start();
         }
 
         public void InitializeComboBoxes() {
@@ -65,6 +59,17 @@ namespace MyrinaUI.ViewModels
             SInstanceType = EC2InstanceTypes[0];
             SAmi = EC2Amis[0];
             SSubnet = EC2Subnets[0];
+
+            // Hack around DataGrid's SelectionChanged event being inaccesible from Avalonia XAML
+            DataGrid _grid = Avalonia.Application.Current.MainWindow.FindControl<DataGrid>("instanceGrid");
+            if (_grid != null) {
+                // Just in case this ever gets called twice...
+                _grid.SelectionChanged -= OnRowClicked;
+                _grid.SelectionChanged += OnRowClicked;
+            } 
+            else {
+                MessageBox.Show("Unable to find grid control!");
+            }
         }
 
         public async Task RefreshEC2Instances() {
@@ -99,10 +104,14 @@ namespace MyrinaUI.ViewModels
             EC2Amis.Add(new EC2AmiModel { Name = "TMC CDIA Master",      Value = "ami-69dc1e14" });    
             EC2Amis.Add(new EC2AmiModel { Name = "LM3 CDIA Integration", Value = "ami-03542d7c" });    
         }
-
         public async Task LaunchEC2Instance() {
             // TODO:  Report the info for the started instance back to the user
             await EC2UtilityModel.LaunchEC2Instance(SAvailabilityZone, SInstanceType, SSubnet.SubnetId, SAmi.Value);
+        }
+
+        public void OnRowClicked(object sender, SelectionChangedEventArgs e) {
+            SInstance = ((sender as DataGrid).SelectedItem as EC2InstanceModel);
+            e.Handled = true;
         }
     }
 }
