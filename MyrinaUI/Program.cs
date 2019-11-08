@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Logging.Serilog;
+using Avalonia.ReactiveUI;
 using MyrinaUI.ViewModels;
 using MyrinaUI.Views;
 
@@ -19,8 +20,7 @@ namespace MyrinaUI
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToDebug()
-                .UseReactiveUI()
-                .UseDataGrid();
+                .UseReactiveUI();
 
         // Your application's entry point. Here you can initialize your MVVM framework, DI
         // container, etc.

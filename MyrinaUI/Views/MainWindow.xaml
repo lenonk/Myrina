@@ -3,19 +3,23 @@
         xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1120" d:DesignHeight="850"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="850"
         x:Class="MyrinaUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico" Name="mainWindow"
-        WindowStartupLocation="CenterScreen"
-        Title="Myrina" Height="850" Width="1120" MinWidth="1120">
+        WindowStartupLocation="CenterScreen" FontSize="13"
+        Title="Myrina" Height="850" Width="1200" MinWidth="1200">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
+
+    <Window.Resources>
+      <vm:StringToBoolConverter x:Key="StringToBoolConverter" />      
+    </Window.Resources>
+
     <Grid
       ColumnDefinitions="10, auto, *, 10"
       RowDefinitions="auto, *, 200, 10">
-
 
       <!-- Row 0 Col 1-->
       <Button Grid.Row="0"
@@ -29,28 +33,87 @@
                     Grid.Column="1"
                     Margin="4,4,4,0"
                     HorizontalScrollBarVisibility="Auto">
-        <DataGrid Name="instanceGrid"
+        <DataGrid Name="instanceGrid" GridLinesVisibility="Vertical"
           VerticalAlignment="Top"
           HorizontalAlignment="Left"
           IsReadOnly="True"
-          AutoGenerateColumns="True"
-          SelectedItem="{Binding SInstance, Mode=OneWayToSource}"
+          SelectionChanged="OnRowClicked"
+          SelectedItem="{Binding SInstance, Mode=TwoWay}"
+          RowDetailsVisibilityMode="VisibleWhenSelected"
           Items="{Binding EC2Instances}">
+
+          <DataGrid.Styles>
+            <Style Selector="DataGridRow:selected">
+              <Setter Property="Foreground" Value="Purple"/>
+              <Setter Property="Opacity" Value=".75"/>
+            </Style>
+          </DataGrid.Styles>
+
+          <DataGrid.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="_Start" />
+              <MenuItem Header="S_top" />
+              <MenuItem Header="_Reboot" />
+              <MenuItem Header="_Terminate" />
+            </ContextMenu>
+          </DataGrid.ContextMenu>
+
+          <DataGrid.Columns>
+            <DataGridTemplateColumn Header="Name">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                   <TextBlock IsVisible="{Binding Name, Converter={StaticResource StringToBoolConverter}}" Text="{Binding Name}" />
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+            <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+            <DataGridTextColumn Header="Zone" Binding="{Binding AvailabilityZone}" />
+            <DataGridTextColumn Header="State" Binding="{Binding State}" />
+          </DataGrid.Columns>
+          <DataGrid.RowDetailsTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto, auto, auto, auto" DataContext="{Binding SInstance}" >
+                <!-- Row 0 -->
+                <!-- AMI ID -->
+                <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="AMI:" />
+                <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="1" Text="{Binding _instance.ImageId}" />
+
+                <!-- Key Name -->
+                <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Text="Key Name:" />
+                <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="3" Text="{Binding _instance.KeyName}" />
+
+                <!-- Instance ID -->
+                <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Text="Instance ID:" />
+                <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="1" Text="{Binding Id}" />
+
+                <!-- Public DNS -->
+                <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="2" Text="Public DNS:" />
+                <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="3" Text="{Binding _instance.PublicDnsName}" />
+
+                <!-- Row 1 -->
+              </Grid>
+            </DataTemplate>
+          </DataGrid.RowDetailsTemplate>
         </DataGrid>
       </ScrollViewer>
 
       <!-- Row 5 Col 0-->
       <TabControl Margin="2,4,0,0" Grid.Row="2" Grid.Column="1" DataContext="{Binding SInstance}">
         <TabItem Header="Description">
-          <Grid ColumnDefinitions="auto,auto,auto,*" RowDefinitions="auto, auto, auto, auto, auto">
+          <Panel>
+          <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto, auto, auto, auto">
             <!-- Instance ID -->
-            <TextBlock Margin="10,10,10,10" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="Instance ID:" />
-            <TextBlock Margin="10,10,10,10" Grid.Row="0" Grid.Column="1" Text="{Binding Id}" />
+            <TextBlock Margin="10,10,0,10" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="Instance ID:" />
+            <TextBlock Margin="10,10,0,10" Grid.Row="0" Grid.Column="1" Text="{Binding Id}" />
             
             <!-- Public DNS -->
-            <TextBlock Margin="10,10,10,10" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Text="Public DNS:" />
-            <TextBlock Margin="10,10,10,10" Grid.Row="0" Grid.Column="3" Text="{Binding _instance.PublicDnsName}" />
+            <TextBlock Margin="10,10,0,10" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Text="Public DNS:" />
+            <TextBlock Margin="10,10,0,10" Grid.Row="0" Grid.Column="3" Text="{Binding _instance.PublicDnsName}" />
           </Grid>
+        </Panel>
         </TabItem>
         <TabItem Header="Status Checks"/>
         <TabItem Header="Monitoring"/>

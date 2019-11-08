@@ -4,16 +4,38 @@ using ReactiveUI;
 using System.Threading.Tasks;
 using MsgBox;
 using Avalonia.Controls;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Avalonia.Input;
+using Avalonia.Data.Converters;
+using System;
 
 namespace MyrinaUI.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
-    {
+    public class StringToBoolConverter : IValueConverter {
+        public object Convert(object value, Type targetType, 
+            object parameter, System.Globalization.CultureInfo culture) {
+            if ((value as string) == "") return false;
+
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, 
+            object parameter, System.Globalization.CultureInfo culture) {
+            // You can't go back...
+            return "";
+        }
+    }
+
+    public class MainWindowViewModel : ViewModelBase {
         public ObservableCollection<EC2InstanceModel> EC2Instances { get; }
         private EC2InstanceModel _sInstance;
         public EC2InstanceModel SInstance {
             get { return _sInstance; }
-            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
+            set {
+                _sInstance = value;
+                this.RaisePropertyChanged(); 
+            }
         }
 
         public ObservableCollection<string> EC2InstanceTypes { get; }
@@ -59,17 +81,6 @@ namespace MyrinaUI.ViewModels
             SInstanceType = EC2InstanceTypes[0];
             SAmi = EC2Amis[0];
             SSubnet = EC2Subnets[0];
-
-            // Hack around DataGrid's SelectionChanged event being inaccesible from Avalonia XAML
-            DataGrid _grid = Avalonia.Application.Current.MainWindow.FindControl<DataGrid>("instanceGrid");
-            if (_grid != null) {
-                // Just in case this ever gets called twice...
-                _grid.SelectionChanged -= OnRowClicked;
-                _grid.SelectionChanged += OnRowClicked;
-            } 
-            else {
-                MessageBox.Show("Unable to find grid control!");
-            }
         }
 
         public async Task RefreshEC2Instances() {
@@ -107,11 +118,6 @@ namespace MyrinaUI.ViewModels
         public async Task LaunchEC2Instance() {
             // TODO:  Report the info for the started instance back to the user
             await EC2UtilityModel.LaunchEC2Instance(SAvailabilityZone, SInstanceType, SSubnet.SubnetId, SAmi.Value);
-        }
-
-        public void OnRowClicked(object sender, SelectionChangedEventArgs e) {
-            SInstance = ((sender as DataGrid).SelectedItem as EC2InstanceModel);
-            e.Handled = true;
         }
     }
 }

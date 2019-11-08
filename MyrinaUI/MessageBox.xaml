@@ -14,7 +14,7 @@
             HorizontalAlignment="Left" 
             Name="Text" />
         <Border Grid.Row="1" Grid.Column = "0" Background="{StaticResource ThemeControlHighBrush}" />
-        <StackPanel Grid.Row="1" Grid.Column="0" 
+        <StackPanel Grid.Row="1" Grid.Column="0"
                     Background="{StaticResource ThemeControlHighBrush}" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right"
