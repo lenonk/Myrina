@@ -157,7 +157,7 @@
                        IsVisible="{Binding EC2Instance.Platform, Converter={StaticResource NegativeStringToBoolConverter}}" Text="Linux" />
 
             <!-- Security Groups -->
-            <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="2" Text="Security Groups:" />
+            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="2" Text="Security Groups:" />
             <ItemsControl Grid.Row="4" Grid.Column="3" Items="{Binding EC2Instance.SecurityGroups}">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -242,7 +242,7 @@
             </ComboBox>
 
             <Button MinHeight="30" Margin="4,0,4,4" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
-                    Content="Launch" Command="{Binding LaunchEoC2Instance}" />
+                    Content="Launch" Command="{Binding LaunchEC2Instance}" />
         </Grid>
       </Border>
     </Grid>
