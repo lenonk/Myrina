@@ -33,6 +33,7 @@ namespace MyrinaUI.Views
                     }
                 },
                 handledEventsToo: true);
+
         }
 
         private void InitializeComponent() {

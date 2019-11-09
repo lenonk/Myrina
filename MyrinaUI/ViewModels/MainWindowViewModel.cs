@@ -9,25 +9,16 @@ using System.Runtime.CompilerServices;
 using Avalonia.Input;
 using Avalonia.Data.Converters;
 using System;
+using System.Diagnostics;
+using Amazon.EC2;
+using Avalonia.Threading;
 
 namespace MyrinaUI.ViewModels
 {
-    public class StringToBoolConverter : IValueConverter {
-        public object Convert(object value, Type targetType, 
-            object parameter, System.Globalization.CultureInfo culture) {
-            if ((value as string) == "") return false;
-
-            return true;
-        }
-
-        public object ConvertBack(object value, Type targetType, 
-            object parameter, System.Globalization.CultureInfo culture) {
-            // You can't go back...
-            return "";
-        }
-    }
-
     public class MainWindowViewModel : ViewModelBase {
+        public static Window MainWindow;
+        private DispatcherTimer _refreshTimer = new DispatcherTimer();
+
         public ObservableCollection<EC2InstanceModel> EC2Instances { get; }
         private EC2InstanceModel _sInstance;
         public EC2InstanceModel SInstance {
@@ -66,14 +57,20 @@ namespace MyrinaUI.ViewModels
             set { this.RaiseAndSetIfChanged(ref _sSubnet, value); }
         }       
 
-        public MainWindowViewModel() {
+        public MainWindowViewModel(Window parent) {
             EC2Instances = new ObservableCollection<EC2InstanceModel>();
             EC2AvailabilityZones = new ObservableCollection<string>();
             EC2InstanceTypes = new ObservableCollection<string>();
             EC2Amis = new ObservableCollection<EC2AmiModel>();
             EC2Subnets = new ObservableCollection<EC2SubnetModel>();
 
+            MainWindow = parent;
+
             RefreshEC2AllData().ContinueWith(_ => InitializeComboBoxes());
+
+            _refreshTimer.Interval = TimeSpan.FromSeconds(30);
+            _refreshTimer.Tick += async (sender, e) => { await RefreshEC2Instances(); };
+            _refreshTimer.Start();
         }
 
         public void InitializeComboBoxes() {
@@ -84,26 +81,57 @@ namespace MyrinaUI.ViewModels
         }
 
         public async Task RefreshEC2Instances() {
-            await EC2UtilityModel.GetEC2Instances(EC2Instances);
+            try {
+                Debug.WriteLine("Refreshing EC2 instances...");
+                EC2InstanceModel si = SInstance;
+                await EC2Utility.GetEC2Instances(EC2Instances).ContinueWith(_ => ResetSelectedInstance(si));
+                Debug.WriteLine("Done refreshing EC2 instances...");
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
         }
 
+        public void ResetSelectedInstance(EC2InstanceModel si) {
+            if (si == null) return;
+
+            foreach (EC2InstanceModel instance in EC2Instances) {
+                if (instance.Id == si.Id)
+                    SInstance = instance;
+            }
+        }
         public async Task RefreshEC2AvailibilityZones() {
-            await EC2UtilityModel.GetEC2AvailabilityZones(EC2AvailabilityZones);
+            try {
+                await EC2Utility.GetEC2AvailabilityZones(EC2AvailabilityZones);
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
         }
 
         public async Task RefreshEC2InstanceTypes() {
-            await EC2UtilityModel.GetEC2InstanceTypes(EC2InstanceTypes);
+            try {
+                await EC2Utility.GetEC2InstanceTypes(EC2InstanceTypes);
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
         }
 
         public async Task RefreshEC2Subnets() {
-            await EC2UtilityModel.GetEC2Subnets(EC2Subnets);
+            try {
+                await EC2Utility.GetEC2Subnets(EC2Subnets);
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
         }
 
         public async Task RefreshEC2AllData() {
-            await EC2UtilityModel.GetEC2Instances(EC2Instances);
-            await EC2UtilityModel.GetEC2AvailabilityZones(EC2AvailabilityZones);
-            await EC2UtilityModel.GetEC2InstanceTypes(EC2InstanceTypes);
-            await EC2UtilityModel.GetEC2Subnets(EC2Subnets);
+            await RefreshEC2Instances();
+            await RefreshEC2AvailibilityZones();
+            await RefreshEC2InstanceTypes();
+            await RefreshEC2Subnets();
 
             // Hardcode AMIs for now, but will pull list from AWS later if necessary
             GetEC2Amis();
@@ -117,7 +145,145 @@ namespace MyrinaUI.ViewModels
         }
         public async Task LaunchEC2Instance() {
             // TODO:  Report the info for the started instance back to the user
-            await EC2UtilityModel.LaunchEC2Instance(SAvailabilityZone, SInstanceType, SSubnet.SubnetId, SAmi.Value);
+            try {
+                await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType, SSubnet.SubnetId, SAmi.Value);
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
+        }
+        public async Task TerminateEC2Instance() {
+            // TODO:  Report the info for the started instance back to the user
+            try {
+                _refreshTimer.Stop();
+                _refreshTimer.IsEnabled = false;
+
+                if (SInstance == null) return;
+                Debug.WriteLine($"Terminating EC2 Instance Id: {SInstance.Id}");
+                await EC2Utility.TerminateEC2Instance(SInstance.Id);
+
+                _refreshTimer.Start();
+                _refreshTimer.IsEnabled = true;
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
+        }
+        public async Task StartEC2Instance() {
+            // TODO:  Report the info for the started instance back to the user
+            try {
+                _refreshTimer.Stop();
+                _refreshTimer.IsEnabled = false;
+
+                if (SInstance == null) return;
+                Debug.WriteLine($"Starting EC2 Instance Id: {SInstance.Id}");
+                await EC2Utility.StartEC2Instance(SInstance.Id);
+
+                _refreshTimer.Start();
+                _refreshTimer.IsEnabled = true;
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
+        }
+
+        public async Task StopEC2Instance() {
+            // TODO:  Report the info for the started instance back to the user
+            try {
+                _refreshTimer.Stop();
+                _refreshTimer.IsEnabled = false;
+
+                if (SInstance == null) return;
+                Debug.WriteLine($"Stopping EC2 Instance Id: {SInstance.Id}");
+                await EC2Utility.StopEC2Instance(SInstance.Id);
+
+                _refreshTimer.Start();
+                _refreshTimer.IsEnabled = true;
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
+        }
+        public async Task RebootEC2Instance() {
+            // TODO:  Report the info for the started instance back to the user
+            try {
+                _refreshTimer.Stop();
+                _refreshTimer.IsEnabled = false;
+
+                if (SInstance == null) return;
+                Debug.WriteLine($"Rebooting EC2 Instance Id: {SInstance.Id}");
+                await EC2Utility.RebootEC2Instance(SInstance.Id);
+
+                _refreshTimer.Start();
+                _refreshTimer.IsEnabled = true;
+            }
+            catch (AmazonEC2Exception e) {
+                MessageBox.Show(e.Message, MainWindow);
+            }
+        }
+    }
+
+    public class StringToBoolConverter : IValueConverter {
+        public object Convert(object value, Type targetType, 
+            object parameter, System.Globalization.CultureInfo culture) {
+            string s = "";
+            PlatformValues pv;
+
+            if (value == null)
+                return false;
+
+            if (value.GetType() == typeof(string)) {
+                s = (value as string);
+            } 
+            else if (value.GetType() == typeof(PlatformValues)) {
+                pv = (value as PlatformValues);
+                s = pv.ToString();
+            }
+            else {
+                throw new InvalidOperationException();
+            }
+
+            //Debug.WriteLine($"Converting {s} to boolean: result == {s.Length == 0}");
+            return s.Length != 0;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, 
+            object parameter, System.Globalization.CultureInfo culture) {
+            // You can't go back...
+            return false;
+        }
+    }
+
+    // Another hack to work around a bug...fook me in the goat arse!
+    public class NegativeStringToBoolConverter : IValueConverter {
+        public object Convert(object value, Type targetType, 
+            object parameter, System.Globalization.CultureInfo culture) {
+            string s = "";
+            PlatformValues pv;
+
+            if (value == null)
+                return true;
+
+            if (value.GetType() == typeof(string)) {
+                s = (value as string);
+            } 
+            else if (value.GetType() == typeof(PlatformValues)) {
+                pv = (value as PlatformValues);
+                s = pv.ToString();
+            }
+            else {
+                throw new InvalidOperationException();
+            }
+
+            //Debug.WriteLine($"Converting {s} to boolean: result == {s.Length == 0}");
+            return s.Length == 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, 
+            object parameter, System.Globalization.CultureInfo culture) {
+            // You can't go back...
+            return true;
         }
     }
 }

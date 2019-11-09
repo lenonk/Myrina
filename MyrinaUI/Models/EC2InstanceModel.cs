@@ -11,7 +11,7 @@ namespace MyrinaUI.Models {
         public string AvailabilityZone { get; set; }
         public string State { get; set; }
 
-        protected internal Instance _instance { get; set; }
-        
+        public Instance EC2Instance { get; set; }
+        public List<TagDescription> Tags;
     }
 }

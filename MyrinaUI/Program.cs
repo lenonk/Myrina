@@ -26,10 +26,8 @@ namespace MyrinaUI
         // container, etc.
         private static void AppMain(Application app, string[] args)
         {
-            var window = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            var window = new MainWindow();
+            window.DataContext = new MainWindowViewModel(window);
 
             app.Run(window);
         }

@@ -25,8 +25,8 @@ namespace MsgBox {
             AvaloniaXamlLoader.Load(this);
         }
 
-        public static void Show(string text) {
-            Show(null, text, "", MessageBoxButtons.Ok);
+        public static void Show(string text, Window parent = null) {
+            Show(parent, text, "", MessageBoxButtons.Ok);
         }
 
         public static Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons) {
