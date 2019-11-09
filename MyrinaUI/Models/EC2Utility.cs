@@ -16,7 +16,7 @@ namespace MyrinaUI.Models {
         static string SecretKey = "9HvvGqJDTkDDllvgljuqdCTZOlew/I8ddvlWXm3z";
 
         static public async Task LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
-            string SSubnet, string SAmi) {
+            string SSubnet, string SAmi, List<Tag> tags = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
 
             RunInstancesRequest req = new RunInstancesRequest();
@@ -27,6 +27,19 @@ namespace MyrinaUI.Models {
             req.ImageId = SAmi;
             req.MinCount = 1;
             req.MaxCount = 1;
+            req.TagSpecifications = new List<TagSpecification>();
+
+            req.TagSpecifications.Add(new TagSpecification() {
+                ResourceType = ResourceType.Instance,
+                Tags = new List<Tag>()
+            });
+
+            req.TagSpecifications[0].Tags.Add(new Tag() { Key = "mgr", Value = "jeff-zawadski" });
+            req.TagSpecifications[0].Tags.Add(new Tag() { Key = "Name", Value = "Created by Myrina" });
+            if (tags != null) {
+                // TODO:  Add other tags here, but make sure it has a name
+            }
+
             try {
                 RunInstancesResponse resp = await client.RunInstancesAsync(req);
                 if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {

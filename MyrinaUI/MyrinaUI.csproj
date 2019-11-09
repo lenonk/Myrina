@@ -15,11 +15,23 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Assets\Amazon_EC2_36x36.png" />
+    <AvaloniaResource Remove="Views\AWSInstanceView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Views\AWSInstanceView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0-preview7" />
     <PackageReference Include="AWSSDK.Core" Version="3.3.103.62" />
     <PackageReference Include="AWSSDK.EC2" Version="3.3.134.9" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\AWSInstanceView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="850"
         x:Class="MyrinaUI.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico" Name="mainWindow"
+        Icon="/Assets/Amazon_EC2_36x36.ico" Name="mainWindow"
         WindowStartupLocation="CenterScreen" FontSize="13"
         Title="Myrina" Height="850" Width="1200" MinWidth="1200">
 
