@@ -315,7 +315,16 @@
 
                     <!-- Key Name -->
                     <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="Key Name:" />
-                    <TextBox Margin="5,0,10,10" Grid.Row="1" Grid.Column="1" Text="{Binding KeyName}" />
+                    <ComboBox Margin="5,0,10,10" MinWidth="100" Grid.Row="1" Grid.Column="1"
+                              Items="{Binding EC2KeyPairs}" SelectedItem="{Binding SKey, Mode=TwoWay}">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding KeyName}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
                   </Grid>
                 </Grid>
               </TabItem>

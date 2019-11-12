@@ -18,7 +18,7 @@ namespace MyrinaUI.Models {
 
         static public async Task LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
             string SSubnet, string SAmi, bool UsePublicIp, 
-            ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, string keyname, ObservableCollection<Tag> tags = null) {
+            ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, KeyPairInfo key, ObservableCollection<Tag> tags = null) {
 
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             RunInstancesRequest req = new RunInstancesRequest();
@@ -29,7 +29,8 @@ namespace MyrinaUI.Models {
             req.MinCount = 1;
             req.MaxCount = startnum;
             req.SecurityGroupIds = new List<string>();
-            req.KeyName = keyname;
+            if (key.KeyFingerprint != "0xdeadbeef")
+                req.KeyName = key.KeyName;
 
             if (SSubnet == "(Default)") SSubnet = "";
             if (UsePublicIp) {
@@ -179,7 +180,8 @@ namespace MyrinaUI.Models {
             DescribeSpotPriceHistoryResponse resp;
 
             var result = await Task.Run(async () => {
-                try { resp = await client.DescribeSpotPriceHistoryAsync(req); } catch (AmazonEC2Exception e) { throw e; }
+                try { resp = await client.DescribeSpotPriceHistoryAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
 
                 if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
                     throw new AmazonEC2Exception($"EC2 function: DescribeSpotPriceHistoryAsync() " +
@@ -270,7 +272,8 @@ namespace MyrinaUI.Models {
             DescribeSecurityGroupsResponse resp;
 
             var result = await Task.Run(async () => {
-                try { resp = await client.DescribeSecurityGroupsAsync(); } catch (AmazonEC2Exception e) { throw e; }
+                try { resp = await client.DescribeSecurityGroupsAsync(); } 
+                catch (AmazonEC2Exception e) { throw e; }
 
                 if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
                     throw new AmazonEC2Exception($"EC2 function: DescribeSecurityGroupsAsync() " +
@@ -394,25 +397,49 @@ namespace MyrinaUI.Models {
 
             col.Clear();
             if (vpc != null && vpc.IsDefault) {
-                col.Add(new Subnet() {
-                     Tags = new List<Tag>() {
-                         new Tag() {
-                            Key = "Name",
-                            Value = "No Preference (default subnet in any zone)"
-                         }
-                     }
-                });  
+                var snet = new Subnet();
+                SortTagsAndAddName(snet.Tags, "No Preference (default in any zone)");
+                col.Add(snet);
             }
             _subnets.ForEach(x => col.Add(x));
 
             return result;
         }
 
-        static private void SortTagsAndAddName(List<Tag> tags, string value) {
+        static public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            var _pairs = new List<KeyPairInfo>();
+
+            var req = new DescribeKeyPairsRequest();
+            DescribeKeyPairsResponse resp;
+
+            var result = await Task.Run(async () => {
+                try { resp = await client.DescribeKeyPairsAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: DescribeKeyPairsAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
+
+                resp.KeyPairs.ForEach((x) => _pairs.Add(x));
+
+                return 0;
+            });
+
+            col.Clear();
+            _pairs.Sort((a, b) => string.Compare(a.KeyName, b.KeyName));
+            col.Add(new KeyPairInfo() { KeyName = "(None Selected)", KeyFingerprint = "0xdeadbeef" });
+            _pairs.ForEach(x => col.Add(x));
+
+            return result;
+        }
+
+        static private void SortTagsAndAddName(List<Tag> tags, string value = null) {
             if (tags == null)
                 tags = new List<Tag>();
 
-            if (value != string.Empty)
+            if (value != null && value != string.Empty)
                 if (!tags.Exists(x => string.Equals(x.Key, "Name", StringComparison.OrdinalIgnoreCase)))
                     tags.Add(new Tag() { Key = "Name", Value = value });
 

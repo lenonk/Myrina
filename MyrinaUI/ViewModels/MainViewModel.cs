@@ -26,6 +26,7 @@ namespace MyrinaUI.ViewModels {
         public ObservableCollection<SecurityGroup> ActiveSecurityGroups { get; } = new ObservableCollection<SecurityGroup>();
         public ObservableCollection<SecurityGroup> EC2SecurityGroups { get; set; } = new ObservableCollection<SecurityGroup>();
         public ObservableCollection<Vpc> EC2Vpcs { get; set; } = new ObservableCollection<Vpc>();
+        public ObservableCollection<KeyPairInfo> EC2KeyPairs { get; set; } = new ObservableCollection<KeyPairInfo>();
 
         // Private class members
         private DispatcherTimer _refreshTimer = new DispatcherTimer();
@@ -63,6 +64,12 @@ namespace MyrinaUI.ViewModels {
             set { this.RaiseAndSetIfChanged(ref _sSubnet, value); }
         }
 
+        private KeyPairInfo _sKey;
+        public KeyPairInfo SKey {
+            get { return _sKey; }
+            set { this.RaiseAndSetIfChanged(ref _sKey, value); }
+        }
+
         private SecurityGroup _sSecurityGroup;
         public SecurityGroup SSecurityGroup {
             get { return _sSecurityGroup; }
@@ -97,14 +104,6 @@ namespace MyrinaUI.ViewModels {
             get { return _startNumber; }
             set { this.RaiseAndSetIfChanged(ref _startNumber, value); }
         }
-
-        private string _keyName;
-        public string KeyName {
-            get { return _keyName; }
-            set { this.RaiseAndSetIfChanged(ref _keyName, value); }
-        }
-
-
         #endregion
 
         // Constructor
@@ -145,6 +144,7 @@ namespace MyrinaUI.ViewModels {
             SecurityGroups,
             Vpcs,
             Images,
+            KeyPairs,
             All
         }
 
@@ -175,6 +175,10 @@ namespace MyrinaUI.ViewModels {
                     await EC2Utility.GetEC2SecurityGroups(EC2SecurityGroups, SVpc)
                         .ContinueWith(_ => SSecurityGroup = SettingsFirstOrDefault("", EC2SecurityGroups));
                 }
+                if (code == AmazonRefreshCode.KeyPairs || code == AmazonRefreshCode.All) {
+                    await EC2Utility.GetEC2KeyPairs(EC2KeyPairs)
+                        .ContinueWith(_ => SKey = SettingsFirstOrDefault("not implemented" /*SKey.DefKeyName*/, EC2KeyPairs));
+                }
                 if (code == AmazonRefreshCode.Images || code == AmazonRefreshCode.All) {
                     // TODO: Pull these from the api
                     //await EC2Utility.GetEC2Images(EC2Images);
@@ -196,6 +200,7 @@ namespace MyrinaUI.ViewModels {
         public void RefreshEC2Vpcs() => RefreshAmazonData(AmazonRefreshCode.Vpcs);
         public void RefreshEC2Images() => RefreshAmazonData(AmazonRefreshCode.Images);
         public void RefreshEC2Subnets() => RefreshAmazonData(AmazonRefreshCode.Subnets);
+        public void RefreshKeyPairInfo() => RefreshAmazonData(AmazonRefreshCode.KeyPairs);
         public void RefreshEC2AllData() => RefreshAmazonData(AmazonRefreshCode.All);
 
         // EC2 Command methods
@@ -231,7 +236,7 @@ namespace MyrinaUI.ViewModels {
                     case AmazonCommand.Launch:
                         await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                             SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
-                            StartNumber, SVpc, KeyName, EC2Tags);
+                            StartNumber, SVpc, SKey, EC2Tags);
                         break;
                     default:
                         break;
