@@ -18,30 +18,10 @@ namespace MyrinaUI.Views
 #if DEBUG
             this.AttachDevTools();
 #endif
-            var grid = this.FindControl<DataGrid>("instanceGrid");
-            grid.AddHandler(
-                InputElement.PointerPressedEvent,
-                (s, e) => {
-                    if (e.MouseButton == MouseButton.Right) {
-                        var row = ((IControl)e.Source).GetSelfAndVisualAncestors()
-                            .OfType<DataGridRow>()
-                            .FirstOrDefault();
-
-                        if (row != null) {
-                            grid.SelectedIndex = row.GetIndex();
-                        }
-                    }
-                },
-                handledEventsToo: true);
-
         }
 
         private void InitializeComponent() {
             AvaloniaXamlLoader.Load(this);
-        }
-
-        public void OnRowClicked(object sender, SelectionChangedEventArgs e) {
-            e.Handled = true;
         }
     }
 }

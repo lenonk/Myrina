@@ -1,7 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ApplicationIcon />
     <StartupObject>MyrinaUI.Program</StartupObject>
   </PropertyGroup>
@@ -16,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Remove="Assets\Amazon_EC2_36x36.png" />
-    <AvaloniaResource Remove="Views\AWSInstanceView.xaml" />
+    <AvaloniaResource Remove="Views\MainView.xaml" />
+    <AvaloniaResource Remove="Views\SettingsView.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Views\AWSInstanceView.xaml" />
+    <None Remove="Views\MainView.xaml" />
+    <None Remove="Views\SettingsView.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0-preview7" />
@@ -30,8 +36,21 @@
     <PackageReference Include="AWSSDK.EC2" Version="3.3.134.9" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\AWSInstanceView.xaml">
+    <EmbeddedResource Include="Views\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\SettingsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
 </Project>
