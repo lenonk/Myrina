@@ -9,6 +9,7 @@ using Amazon.EC2;
 using Avalonia.Threading;
 using Amazon.EC2.Model;
 using System.Reactive.Linq;
+using System.Reflection;
 
 namespace MyrinaUI.ViewModels {
     using EC2Image = Amazon.EC2.Model.Image;
@@ -96,6 +97,14 @@ namespace MyrinaUI.ViewModels {
             get { return _startNumber; }
             set { this.RaiseAndSetIfChanged(ref _startNumber, value); }
         }
+
+        private string _keyName;
+        public string KeyName {
+            get { return _keyName; }
+            set { this.RaiseAndSetIfChanged(ref _keyName, value); }
+        }
+
+
         #endregion
 
         // Constructor
@@ -117,7 +126,10 @@ namespace MyrinaUI.ViewModels {
 
             RefreshEC2AllData();
 
-            this.WhenAnyValue(x => x.SVpc).Subscribe((x) => { RefreshEC2Subnets(); });
+            this.WhenAnyValue(x => x.SVpc).Subscribe((x) => { 
+                RefreshEC2Subnets(); 
+                RefreshEC2SecurityGroups(); 
+            });
 
             _refreshTimer.Interval = TimeSpan.FromSeconds(30);
             _refreshTimer.Tick += (sender, e) => { RefreshEC2Instances(); };
@@ -145,7 +157,7 @@ namespace MyrinaUI.ViewModels {
                 }
                 if (code == AmazonRefreshCode.Vpcs || code == AmazonRefreshCode.All) {
                     await EC2Utility.GetEC2Vpcs(EC2Vpcs)
-                        .ContinueWith(_ => SVpc = SettingsFirstOrDefault("not implemented" /*SettingsView.DefSubnet*/, EC2Vpcs));
+                        .ContinueWith(_ => SVpc = SettingsFirstOrDefault(SettingsView.DefVpc, EC2Vpcs, "VpcId"));
                 }
                 if (code == AmazonRefreshCode.Zones || code == AmazonRefreshCode.All) {
                     await EC2Utility.GetEC2AvailabilityZones(EC2AvailabilityZones)
@@ -157,11 +169,11 @@ namespace MyrinaUI.ViewModels {
                 }
                 if (code == AmazonRefreshCode.Subnets || code == AmazonRefreshCode.All) {
                     await EC2Utility.GetEC2Subnets(EC2Subnets, SVpc)
-                        .ContinueWith(_ => SSubnet = SettingsFirstOrDefault(SettingsView.DefSubnet, EC2Subnets));
+                        .ContinueWith(_ => SSubnet = SettingsFirstOrDefault("", EC2Subnets));
                 }
                 if (code == AmazonRefreshCode.SecurityGroups || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2SecurityGroups(EC2SecurityGroups)
-                        .ContinueWith(_ => SSecurityGroup = SettingsFirstOrDefault("not implemented" /*SettingsView.DefSubnet*/, EC2SecurityGroups));
+                    await EC2Utility.GetEC2SecurityGroups(EC2SecurityGroups, SVpc)
+                        .ContinueWith(_ => SSecurityGroup = SettingsFirstOrDefault("", EC2SecurityGroups));
                 }
                 if (code == AmazonRefreshCode.Images || code == AmazonRefreshCode.All) {
                     // TODO: Pull these from the api
@@ -219,7 +231,7 @@ namespace MyrinaUI.ViewModels {
                     case AmazonCommand.Launch:
                         await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                             SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
-                            StartNumber, SVpc, EC2Tags);
+                            StartNumber, SVpc, KeyName, EC2Tags);
                         break;
                     default:
                         break;
@@ -248,10 +260,17 @@ namespace MyrinaUI.ViewModels {
             }
         }
 
-        private T SettingsFirstOrDefault<T>(string value, ObservableCollection<T> col) {
+        private T SettingsFirstOrDefault<T>(string value, ObservableCollection<T> col, string property = null) {
             if (value != null && value != string.Empty) {
                 foreach (T x in col) {
-                    if (x as string == value) return x;
+                    if (x as string == value) 
+                        return x;
+
+                    if (property != null) {
+                        PropertyInfo pi = x.GetType().GetProperty(property);
+                        if (pi != null && pi.GetValue(x) as string == value)
+                            return x;
+                    }
                 }
             }
 

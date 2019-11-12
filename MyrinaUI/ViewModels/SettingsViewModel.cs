@@ -48,10 +48,10 @@ namespace MyrinaUI.ViewModels {
             set { this.RaiseAndSetIfChanged(ref _defAmi, value); }
         }
 
-        private string _defSubnet;
-        public string DefSubnet {
-            get { return _defSubnet; }
-            set { this.RaiseAndSetIfChanged(ref _defSubnet, value); }
+        private string _defVpc;
+        public string DefVpc {
+            get { return _defVpc; }
+            set { this.RaiseAndSetIfChanged(ref _defVpc, value); }
         }
 
         private ObservableCollection<Tag> _defTags = new ObservableCollection<Tag>();
@@ -105,7 +105,7 @@ namespace MyrinaUI.ViewModels {
                 this.DefZone = svm.DefZone;
                 this.DefInstanceSize = svm.DefInstanceSize;
                 this.DefAmi = svm.DefAmi;
-                this.DefSubnet = svm.DefSubnet;
+                this.DefVpc = svm.DefVpc;
                 this.DefTags = svm.DefTags;
             }
         }

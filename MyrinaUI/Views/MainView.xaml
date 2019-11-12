@@ -57,6 +57,7 @@
             SelectionChanged="OnRowClicked"
             SelectedItem="{Binding SInstance, Mode=TwoWay}"
             RowDetailsVisibilityMode="VisibleWhenSelected"
+            MinWidth="720"
             Items="{Binding EC2Instances}">
 
             <DataGrid.Styles>
@@ -307,9 +308,15 @@
                   <!-- Assign Public IP -->
                   <CheckBox Margin="10,0,5,10" Grid.Row="6" Content="Assign Public IP" IsChecked="{Binding UsePublicIp}" />
 
-                  <!-- Number of Instances -->
-                  <TextBlock Margin="5,0,0,5" Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" Text="Number of Instances:" />
-                  <TextBox Margin="5,0,10,10" Grid.Row="5" Grid.Column="1" Text="{Binding StartNumber}" />
+                  <Grid Grid.Row="4" Grid.Column="1" Grid.RowSpan="2" RowDefinitions="auto, auto" ColumnDefinitions="auto, *">
+                    <!-- Number of Instances -->
+                    <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Count:" />
+                    <TextBox MinWidth="40" Margin="5,0,10,10" Grid.Row="1" Grid.Column="0" Text="{Binding StartNumber}" />
+
+                    <!-- Key Name -->
+                    <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="Key Name:" />
+                    <TextBox Margin="5,0,10,10" Grid.Row="1" Grid.Column="1" Text="{Binding KeyName}" />
+                  </Grid>
                 </Grid>
               </TabItem>
             </TabControl>

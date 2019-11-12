@@ -18,7 +18,7 @@ namespace MyrinaUI.Models {
 
         static public async Task LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
             string SSubnet, string SAmi, bool UsePublicIp, 
-            ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, ObservableCollection<Tag> tags = null) {
+            ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, string keyname, ObservableCollection<Tag> tags = null) {
 
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             RunInstancesRequest req = new RunInstancesRequest();
@@ -29,6 +29,7 @@ namespace MyrinaUI.Models {
             req.MinCount = 1;
             req.MaxCount = startnum;
             req.SecurityGroupIds = new List<string>();
+            req.KeyName = keyname;
 
             if (SSubnet == "(Default)") SSubnet = "";
             if (UsePublicIp) {
@@ -261,7 +262,7 @@ namespace MyrinaUI.Models {
             return result;
         }
 
-        static public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col) {
+        static public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _groups = new List<SecurityGroup>();
             
@@ -269,8 +270,7 @@ namespace MyrinaUI.Models {
             DescribeSecurityGroupsResponse resp;
 
             var result = await Task.Run(async () => {
-                try { resp = await client.DescribeSecurityGroupsAsync(); } 
-                catch (AmazonEC2Exception e) { throw e; }
+                try { resp = await client.DescribeSecurityGroupsAsync(); } catch (AmazonEC2Exception e) { throw e; }
 
                 if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
                     throw new AmazonEC2Exception($"EC2 function: DescribeSecurityGroupsAsync() " +
@@ -278,7 +278,11 @@ namespace MyrinaUI.Models {
                 }
 
                 resp.SecurityGroups.Sort((a, b) => string.Compare(a.GroupName, b.GroupName));
-                resp.SecurityGroups.ForEach((x) => _groups.Add(x));
+                resp.SecurityGroups.ForEach((x) => {
+                if (vpc == null || x.VpcId == vpc.VpcId)
+                    _groups.Add(x);
+                });
+
                 return 0;
             });
 

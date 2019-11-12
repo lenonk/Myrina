@@ -39,8 +39,8 @@
             <TextBox Margin="5,0,10,10" Grid.Row="1" Grid.Column="1" Text="{Binding DefInstanceSize}"/>
 
             <!-- Subnet -->
-            <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Text="Subnet Id:" />
-            <TextBox Margin="10,0,5,10" Grid.Row="3" Grid.Column="0" Text="{Binding DefSubnet}"/>
+            <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Text="VPC Id:" />
+            <TextBox Margin="10,0,5,10" Grid.Row="3" Grid.Column="0" Text="{Binding DefVpc}"/>
 
             <!-- Ami -->
             <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" Text="Image:" />
