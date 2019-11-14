@@ -1,14 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.VisualTree;
-using MsgBox;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows;
 
 namespace MyrinaUI.Views
 {

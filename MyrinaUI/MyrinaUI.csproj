@@ -8,6 +8,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ApplicationIcon />
     <StartupObject>MyrinaUI.Program</StartupObject>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
@@ -20,12 +21,17 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Remove="Assets\Amazon_EC2_36x36.png" />
+    <AvaloniaResource Remove="Assets\collapse.png" />
+    <AvaloniaResource Remove="Assets\expand.png" />
+    <AvaloniaResource Remove="Views\DataGridView.xaml" />
+    <AvaloniaResource Remove="Views\LogView.xaml" />
     <AvaloniaResource Remove="Views\MainView.xaml" />
     <AvaloniaResource Remove="Views\SettingsView.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Views\DataGridView.xaml" />
+    <None Remove="Views\LogView.xaml" />
     <None Remove="Views\MainView.xaml" />
-    <None Remove="Views\SettingsView.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0-preview7" />
@@ -46,11 +52,29 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\LogControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\LogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\DataGridView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

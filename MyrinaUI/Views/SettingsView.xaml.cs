@@ -1,11 +1,5 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MyrinaUI.Views {
     public class SettingsView : UserControl {
@@ -17,22 +11,16 @@ namespace MyrinaUI.Views {
             AvaloniaXamlLoader.Load(this);
         }
 
-        public void SetBounds(Rect b) { 
-            Bounds = b; 
-        }
-
         public void Show() {
-            //SetValue(MarginProperty, new Thickness(1000,0,0,0));
+            IsVisible = true;
             Opacity = 1;
             ZIndex = 99;
-            //IsVisible = true;
-            //_ = SlideIn(TimeSpan.FromMilliseconds(500));
         }
 
         public void Hide() {
             Opacity = 0;
             ZIndex = -1;
-            //IsVisible = false;
+            IsVisible = false;
         }
 
         /*public async Task<int> SlideIn(TimeSpan time) {

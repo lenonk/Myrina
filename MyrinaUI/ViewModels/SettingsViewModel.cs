@@ -3,17 +3,15 @@ using Avalonia.Controls;
 using Avalonia.VisualTree;
 using MyrinaUI.Views;
 using ReactiveUI;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 
 namespace MyrinaUI.ViewModels {
     public class SettingsViewModel : ViewModelBase {
-        private static Window MainWindow;
         public static SettingsViewModel Settings;
+        private Window MainWindow;
 
         const string configFile = "Myrina.cfg";
 
@@ -76,7 +74,7 @@ namespace MyrinaUI.ViewModels {
         public void Show() {
             var sv = MainWindow.GetVisualDescendants()
                 .OfType<SettingsView>()
-                .FirstOrDefault(x => x.Name == "SettingsView");
+                .FirstOrDefault(x => x.Name == "Settings");
 
             sv.Show();
         }
@@ -84,7 +82,7 @@ namespace MyrinaUI.ViewModels {
         public void Hide() {
             var sv = MainWindow.GetVisualDescendants()
                 .OfType<SettingsView>()
-                .FirstOrDefault(x => x.Name == "SettingsView");
+                .FirstOrDefault(x => x.Name == "Settings");
 
             sv.Hide();
             Save("Myrina.cfg");

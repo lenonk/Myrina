@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using MyrinaUI.Models;
 using ReactiveUI;
-using MsgBox;
 using Avalonia.Controls;
-using Avalonia.Data.Converters;
 using Amazon.EC2;
-using Avalonia.Threading;
 using Amazon.EC2.Model;
 using System.Reactive.Linq;
 using System.Reflection;
+using MyrinaUI.Utility;
 
 namespace MyrinaUI.ViewModels {
     using EC2Image = Amazon.EC2.Model.Image;
@@ -17,8 +14,6 @@ namespace MyrinaUI.ViewModels {
     public class MainViewModel : ViewModelBase {
 
         // Public class members
-        public static Window MainWindow;
-        public ObservableCollection<Instance> EC2Instances { get; } = new ObservableCollection<Instance>();
         public ObservableCollection<string> EC2InstanceTypes { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> EC2AvailabilityZones { get; } = new ObservableCollection<string>();
         public ObservableCollection<EC2Image> EC2Images { get; } = new ObservableCollection<EC2Image>();
@@ -27,18 +22,13 @@ namespace MyrinaUI.ViewModels {
         public ObservableCollection<SecurityGroup> EC2SecurityGroups { get; set; } = new ObservableCollection<SecurityGroup>();
         public ObservableCollection<Vpc> EC2Vpcs { get; set; } = new ObservableCollection<Vpc>();
         public ObservableCollection<KeyPairInfo> EC2KeyPairs { get; set; } = new ObservableCollection<KeyPairInfo>();
+        public ObservableCollection<Tag> EC2Tags { get; } = new ObservableCollection<Tag>();
 
         // Private class members
-        private DispatcherTimer _refreshTimer = new DispatcherTimer();
-        private ObservableCollection<Tag> _ec2Tags = new ObservableCollection<Tag>();
+        private static Window MainWindow;
 
         // Properties
         #region Properties
-        private Instance _sInstance;
-        public Instance SInstance {
-            get { return _sInstance; }
-            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
-        }
 
         private string _sInstanceType;
         public string SInstanceType {
@@ -88,11 +78,6 @@ namespace MyrinaUI.ViewModels {
             set { this.RaiseAndSetIfChanged(ref _settingsView, value); }
         }
 
-        public ObservableCollection<Tag> EC2Tags {
-            get { return _ec2Tags; }
-            set { this.RaiseAndSetIfChanged(ref _ec2Tags, value); }
-        }
-
         private bool _usePublicIp = true;
         public bool UsePublicIp {
             get { return _usePublicIp; }
@@ -121,7 +106,7 @@ namespace MyrinaUI.ViewModels {
         public void DeleteTag(Tag key) => EC2Tags.Remove(key);
         public void ShowSettings() => SettingsView.Show();
 
-        public void Initialize() {
+        private void Initialize() {
 
             RefreshEC2AllData();
 
@@ -129,15 +114,17 @@ namespace MyrinaUI.ViewModels {
                 RefreshEC2Subnets(); 
                 RefreshEC2SecurityGroups(); 
             });
+        }
 
-            _refreshTimer.Interval = TimeSpan.FromSeconds(30);
-            _refreshTimer.Tick += (sender, e) => { RefreshEC2Instances(); };
-            _refreshTimer.Start();
+        public async void LaunchEC2Instance() {
+            var msg = await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
+                SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
+                StartNumber, SVpc, SKey, EC2Tags);
+            LogViewModel.LogView.Log(msg);
         }
 
         // Data refresh methods
         private enum AmazonRefreshCode {
-            Instances,
             Zones,
             Types,
             Subnets,
@@ -150,11 +137,6 @@ namespace MyrinaUI.ViewModels {
 
         private async void RefreshAmazonData(AmazonRefreshCode code) {
             try {
-                if (code == AmazonRefreshCode.Instances || code == AmazonRefreshCode.All) {
-                    Instance si = SInstance;
-                    await EC2Utility.GetEC2Instances(EC2Instances)
-                        .ContinueWith(_ => ResetSelectedInstance(si));
-                }
                 if (code == AmazonRefreshCode.Vpcs || code == AmazonRefreshCode.All) {
                     await EC2Utility.GetEC2Vpcs(EC2Vpcs)
                         .ContinueWith(_ => SVpc = SettingsFirstOrDefault(SettingsView.DefVpc, EC2Vpcs, "VpcId"));
@@ -188,12 +170,12 @@ namespace MyrinaUI.ViewModels {
                     EC2Images.Add(new EC2Image { Name = "LM3 CDIA Integration", ImageId = "ami-03542d7c" });
                     SImage = SettingsFirstOrDefault(SettingsView.DefAmi, EC2Images);
                 }
-            } catch (AmazonEC2Exception e) {
-                MessageBox.Show(e.Message, MainWindow);
+            } catch (Exception e) 
+                when (e is AmazonEC2Exception) {
+                LogViewModel.LogView.Log(e.Message);
             }
         }
 
-        public void RefreshEC2Instances() => RefreshAmazonData(AmazonRefreshCode.Instances);
         public void RefreshEC2AvailibilityZones() => RefreshAmazonData(AmazonRefreshCode.Zones);
         public void RefreshEC2InstanceTypes() => RefreshAmazonData(AmazonRefreshCode.Types);
         public void RefreshEC2SecurityGroups() => RefreshAmazonData(AmazonRefreshCode.SecurityGroups);
@@ -203,68 +185,7 @@ namespace MyrinaUI.ViewModels {
         public void RefreshKeyPairInfo() => RefreshAmazonData(AmazonRefreshCode.KeyPairs);
         public void RefreshEC2AllData() => RefreshAmazonData(AmazonRefreshCode.All);
 
-        // EC2 Command methods
-        private enum AmazonCommand {
-            Reboot,
-            Start,
-            Stop,
-            Terminate,
-            Launch
-        }
-
-        private async void RunAmazonCommand(AmazonCommand code) {
-            try {
-                _refreshTimer.Stop();
-                _refreshTimer.IsEnabled = false;
-
-                if (SInstance == null && code != AmazonCommand.Launch) 
-                    return;
-
-                switch (code) {
-                    case AmazonCommand.Reboot:
-                        await EC2Utility.RebootEC2Instance(SInstance.InstanceId);
-                        break;
-                    case AmazonCommand.Start:
-                        await EC2Utility.StartEC2Instance(SInstance.InstanceId);
-                        break;
-                    case AmazonCommand.Stop:
-                        await EC2Utility.StopEC2Instance(SInstance.InstanceId);
-                        break;
-                    case AmazonCommand.Terminate:
-                        await EC2Utility.TerminateEC2Instance(SInstance.InstanceId);
-                        break;
-                    case AmazonCommand.Launch:
-                        await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
-                            SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
-                            StartNumber, SVpc, SKey, EC2Tags);
-                        break;
-                    default:
-                        break;
-                }
-
-                _refreshTimer.Start();
-                _refreshTimer.IsEnabled = true;
-            } catch (AmazonEC2Exception e) {
-                MessageBox.Show(e.Message, MainWindow);
-            }
-        }
-
-        public void LaunchEC2Instance() => RunAmazonCommand(AmazonCommand.Launch);
-        public void TerminateEC2Instance() => RunAmazonCommand(AmazonCommand.Terminate);
-        public void StartEC2Instance() => RunAmazonCommand(AmazonCommand.Start);
-        public void StopEC2Instance() => RunAmazonCommand(AmazonCommand.Stop);
-        public void RebootEC2Instance() => RunAmazonCommand(AmazonCommand.Reboot);
-
         // Private helpers
-        private void ResetSelectedInstance(Instance si) {
-            if (si == null) return;
-
-            foreach (Instance instance in EC2Instances) {
-                if (instance.InstanceId == si.InstanceId)
-                    SInstance = instance;
-            }
-        }
-
         private T SettingsFirstOrDefault<T>(string value, ObservableCollection<T> col, string property = null) {
             if (value != null && value != string.Empty) {
                 foreach (T x in col) {
@@ -283,66 +204,6 @@ namespace MyrinaUI.ViewModels {
                 return col[0];
 
             return default(T);
-        }
-    }
-
-    public class StringToBoolConverter : IValueConverter {
-        public object Convert(object value, Type targetType,
-            object parameter, System.Globalization.CultureInfo culture) {
-            string s = "";
-            PlatformValues pv;
-
-            if (value == null)
-                return false;
-
-            if (value.GetType() == typeof(string)) {
-                s = (value as string);
-            } else if (value.GetType() == typeof(PlatformValues)) {
-                pv = (value as PlatformValues);
-                s = pv.ToString();
-            } else {
-                throw new InvalidOperationException();
-            }
-
-            //Debug.WriteLine($"Converting {s} to boolean: result == {s.Length == 0}");
-            return s.Length != 0;
-
-        }
-
-        public object ConvertBack(object value, Type targetType,
-            object parameter, System.Globalization.CultureInfo culture) {
-            // You can't go back...
-            return false;
-        }
-    }
-
-    // Another hack to work around a bug...fook me in the goat arse!
-    public class NegativeStringToBoolConverter : IValueConverter {
-        public object Convert(object value, Type targetType,
-            object parameter, System.Globalization.CultureInfo culture) {
-            string s = "";
-            PlatformValues pv;
-
-            if (value == null)
-                return true;
-
-            if (value.GetType() == typeof(string)) {
-                s = (value as string);
-            } else if (value.GetType() == typeof(PlatformValues)) {
-                pv = (value as PlatformValues);
-                s = pv.ToString();
-            } else {
-                throw new InvalidOperationException();
-            }
-
-            //Debug.WriteLine($"Converting {s} to boolean: result == {s.Length == 0}");
-            return s.Length == 0;
-        }
-
-        public object ConvertBack(object value, Type targetType,
-            object parameter, System.Globalization.CultureInfo culture) {
-            // You can't go back...
-            return true;
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace MyrinaUI.Views {
-    public class MainView : UserControl {
-        public MainView() {
+namespace MyrinaUI.UserControls {
+    public class LogControl : UserControl {
+        public LogControl() {
             this.InitializeComponent();
         }
 

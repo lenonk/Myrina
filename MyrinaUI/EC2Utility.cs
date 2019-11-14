@@ -1,22 +1,19 @@
 ﻿using Amazon;
 using Amazon.EC2;
 using Amazon.EC2.Model;
-using MsgBox;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Threading.Tasks;
 using MyrinaUI.ViewModels;
 using System.Diagnostics;
-using System.Linq;
 
-namespace MyrinaUI.Models {
+namespace MyrinaUI.Utility {
     static public class EC2Utility {
         static string AccessKey = SettingsViewModel.Settings.AccessKey;
         static string SecretKey = SettingsViewModel.Settings.SecretKey;
 
-        static public async Task LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
+        static public async Task<string> LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
             string SSubnet, string SAmi, bool UsePublicIp, 
             ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, KeyPairInfo key, ObservableCollection<Tag> tags = null) {
 
@@ -80,96 +77,112 @@ namespace MyrinaUI.Models {
                 }
             }
 
-            try {
-                RunInstancesResponse resp = await client.RunInstancesAsync(req);
-                if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {
-                    foreach (Instance instance in resp.Reservation.Instances) {
-                        MessageBox.Show($"Sucessfully started instance id: {instance.InstanceId}", MainViewModel.MainWindow);
+            RunInstancesResponse resp;
+
+            var result = await Task.Run(async () => {
+                try { resp = await client.RunInstancesAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
+                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                        throw new AmazonEC2Exception($"EC2 function: RunInstancesAsync() " +
+                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                     }
 
-                    return;
-                }
+                string msgs = "";
+                    foreach (Instance instance in resp.Reservation.Instances) {
+                        msgs += $"Sucessfully started instance id: {instance.InstanceId}";
+                    }
 
-                MessageBox.Show($"EC2 function: RunInstancesAsync() " +
-                    $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]", MainViewModel.MainWindow);
-            }
-            catch (AmazonEC2Exception e) {
-                throw e;
-            }
+                return msgs;
+            });
+
+            return result;
         }
         
-        static public async Task TerminateEC2Instance(string instance) {
+        static public async Task<string> TerminateEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
-            TerminateInstancesRequest req = new TerminateInstancesRequest();
-            req.InstanceIds.Add(instance);
-            try {
-                TerminateInstancesResponse resp = await client.TerminateInstancesAsync(req);
-                if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {
-                    MessageBox.Show($"Sucessfully requested termination of instance id: {instance}", MainViewModel.MainWindow);
-                    return;
-                }
+            var req = new TerminateInstancesRequest();
 
-                MessageBox.Show($"EC2 function: TerminateInstancesAsync() " +
-                    $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]", MainViewModel.MainWindow);
-            }
-            catch (AmazonEC2Exception e) {
-                throw e;
-            }
-        }
-        static public async Task StartEC2Instance(string instance) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
-            StartInstancesRequest req = new StartInstancesRequest();
+            TerminateInstancesResponse resp;
             req.InstanceIds.Add(instance);
-            try {
-                StartInstancesResponse resp = await client.StartInstancesAsync(req);
-                if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {
-                    MessageBox.Show($"Sucessfully requested start of instance id: {instance}", MainViewModel.MainWindow);
-                    return;
-                }
 
-                MessageBox.Show($"EC2 function: StartInstancesAsync() " +
-                    $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]", MainViewModel.MainWindow);
-            }
-            catch (AmazonEC2Exception e) {
-                throw e;
-            }
+            var result = await Task.Run(async () => {
+                try { resp = await client.TerminateInstancesAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: TerminateInstancesAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
+                return $"Sucessfully requested termination of instance id: {instance}";
+            });
+
+            return result;
         }
 
-        static public async Task StopEC2Instance(string instance) {
+        static public async Task<string> StartEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
-            StopInstancesRequest req = new StopInstancesRequest();
+            var req = new StartInstancesRequest();
+
+            StartInstancesResponse resp;
             req.InstanceIds.Add(instance);
-            try {
-                StopInstancesResponse resp = await client.StopInstancesAsync(req);
-                if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {
-                    MessageBox.Show($"Sucessfully requested stop of instance id: {instance}", MainViewModel.MainWindow);
-                    return;
+
+            var result = await Task.Run(async () => {
+                try { resp = await client.StartInstancesAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: StartInstancesAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                MessageBox.Show($"EC2 function: StopInstancesAsync() " +
-                    $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]", MainViewModel.MainWindow);
-            }
-            catch (AmazonEC2Exception e) {
-                throw e;
-            }
+                return $"Sucessfully requested start of instance id: {instance}";
+            });
+
+            return result;
         }
-        static public async Task RebootEC2Instance(string instance) {
+
+        static public async Task<string> StopEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
-            RebootInstancesRequest req = new RebootInstancesRequest();
+            var req = new StopInstancesRequest();
+
+            StopInstancesResponse resp;
             req.InstanceIds.Add(instance);
-            try {
-                RebootInstancesResponse resp = await client.RebootInstancesAsync(req);
-                if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {
-                    MessageBox.Show($"Sucessfully requested reboot of instance id: {instance}", MainViewModel.MainWindow);
-                    return;
+
+            var result = await Task.Run(async () => {
+                try { resp = await client.StopInstancesAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: StopInstancesAsync() " + 
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                MessageBox.Show($"EC2 function: RebootInstancesAsync() " +
-                    $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]", MainViewModel.MainWindow);
-            }
-            catch (AmazonEC2Exception e) {
-                throw e;
-            }
+                return $"Sucessfully requested stop of instance id: {instance}";
+            });
+
+            return result;
+        }
+
+        static public async Task<string> RebootEC2Instance(string instance) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            var req = new RebootInstancesRequest();
+
+            req.InstanceIds.Add(instance);
+            RebootInstancesResponse resp;
+
+            var result = await Task.Run(async () => {
+                try { resp = await client.RebootInstancesAsync(req); } 
+                catch (AmazonEC2Exception e) { throw e; }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: RebootInstancesAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
+
+                return $"Sucessfully requested reboot of instance id: {instance}";
+            });
+
+            return result;
         }
 
         static public async Task<int> GetEC2InstanceTypes(ObservableCollection<string> col) {
@@ -342,7 +355,9 @@ namespace MyrinaUI.Models {
 
             var result = await Task.Run(async () => { 
                 try { resp = await client.DescribeAvailabilityZonesAsync(req); }
-                catch (AmazonEC2Exception e) { throw e; }
+                catch (AmazonEC2Exception e) {
+                    throw e;
+                }
 
                 if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
                     throw new AmazonEC2Exception($"EC2 function: DescribeAvailabilityZonesAsync() " +

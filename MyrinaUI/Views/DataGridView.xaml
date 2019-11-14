@@ -1,0 +1,108 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cv="clr-namespace:MyrinaUI.Converters;assembly=MyrinaUI"
+             xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MyrinaUI.Views.DataGridView">
+
+  <UserControl.DataContext>
+    <vm:DataGridViewModel />
+  </UserControl.DataContext>
+
+  <UserControl.Resources>
+    <cv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    <cv:NegativeStringToBoolConverter x:Key="NegativeStringToBoolConverter" />
+  </UserControl.Resources>
+  
+  <Border Margin="0,2,4,0" Grid.Row="0" Grid.Column="1" BorderBrush="#23404C" BorderThickness="1">
+    <ScrollViewer Margin="4,4,4,4" HorizontalScrollBarVisibility="Auto">
+      <DataGrid Name="instanceGrid" GridLinesVisibility="Vertical" Margin="0,0,3,0"
+        VerticalAlignment="Top"
+        HorizontalAlignment="Left"
+        IsReadOnly="True"
+        SelectedItem="{Binding SInstance, Mode=TwoWay}"
+        RowDetailsVisibilityMode="VisibleWhenSelected"
+        MinWidth="720"
+        Items="{Binding EC2Instances}">
+
+        <DataGrid.Styles>
+          <Style Selector="DataGridRow:selected">
+            <Setter Property="Foreground" Value="Purple"/>
+            <Setter Property="FontStyle" Value="Italic" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Opacity" Value="1"/>
+          </Style>
+        </DataGrid.Styles>
+
+        <DataGrid.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="_Start" Command="{Binding StartEC2Instance}" />
+            <MenuItem Header="S_top" Command="{Binding StopEC2Instance}"/>
+            <MenuItem Header="_Reboot" Command="{Binding RebootEC2Instance}"/>
+            <MenuItem Header="_Terminate" Command="{Binding TerminateEC2Instance}"/>
+            <!-- Separators don't work in context menus.  Le sigh....
+            <Separator /> -->
+            <MenuItem Margin="5,5,5,5" Height="1" Background="LightGray" />
+            <MenuItem Header="Re_fresh" Command="{Binding RefreshEC2Instances}"/>
+          </ContextMenu>
+        </DataGrid.ContextMenu>
+
+        <DataGrid.Columns>
+          <DataGridTemplateColumn Header="Name">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <StackPanel>
+                  <TextBlock IsVisible="{Binding Tags[0].Value, Converter={StaticResource StringToBoolConverter}}" 
+                             Text="{Binding Tags[0].Value}" />
+                  <TextBlock IsVisible="{Binding Tags[0].Value, Converter={StaticResource NegativeStringToBoolConverter}}"
+                             FontStyle="Italic" FontWeight="SemiBold" Foreground="DarkOrange" Text="No Name Specified" />
+                </StackPanel>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+
+          <DataGridTextColumn Header="Id" Binding="{Binding InstanceId}" />
+          <DataGridTextColumn Header="Type" Binding="{Binding InstanceType.Value}" />
+          <DataGridTextColumn Header="Zone" Binding="{Binding Placement.AvailabilityZone}" />
+          <DataGridTextColumn Header="State" Binding="{Binding State.Name.Value}"/>
+        </DataGrid.Columns>
+        <DataGrid.RowDetailsTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto, auto, auto, auto" >
+              <!-- Row 0 -->
+              <!-- Image ID -->
+              <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="Image:" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="1" Text="{Binding ImageId}" />
+
+              <!-- Key Name -->
+              <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Text="Key Name:" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="3" Text="{Binding KeyName}" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="3"
+                         IsVisible="{Binding KeyName, Converter={StaticResource NegativeStringToBoolConverter}}"
+                         FontStyle="Italic" FontWeight="SemiBold" Foreground="DarkOrange" Text="No Key Specified" />
+
+              <!-- Public IP -->
+              <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Text="Public IP:" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="1" Text="{Binding PublicIpAddress}" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="1"
+                         IsVisible="{Binding PublicIpAddress, Converter={StaticResource NegativeStringToBoolConverter}}"
+                         FontStyle="Italic" FontWeight="SemiBold" Foreground="DarkOrange" Text="No Public IP" />
+
+              <!-- Public DNS -->
+              <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="2" Text="Public DNS:" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="3" Text="{Binding PublicDnsName}" />
+              <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="3"
+                         IsVisible="{Binding PublicDnsName, Converter={StaticResource NegativeStringToBoolConverter}}"
+                         FontStyle="Italic" FontWeight="SemiBold" Foreground="DarkOrange" Text="No Public DNS" />
+
+              <!-- Row 1 -->
+            </Grid>
+          </DataTemplate>
+        </DataGrid.RowDetailsTemplate>
+      </DataGrid>
+    </ScrollViewer>
+  </Border>
+
+  </UserControl>
