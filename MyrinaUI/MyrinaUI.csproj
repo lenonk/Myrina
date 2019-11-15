@@ -20,20 +20,6 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
-    <AvaloniaResource Remove="Assets\Amazon_EC2_36x36.png" />
-    <AvaloniaResource Remove="Assets\collapse.png" />
-    <AvaloniaResource Remove="Assets\expand.png" />
-    <AvaloniaResource Remove="Views\DataGridView.xaml" />
-    <AvaloniaResource Remove="Views\LogView.xaml" />
-    <AvaloniaResource Remove="Views\MainView.xaml" />
-    <AvaloniaResource Remove="Views\SettingsView.xaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Views\DataGridView.xaml" />
-    <None Remove="Views\LogView.xaml" />
-    <None Remove="Views\MainView.xaml" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.0-preview7" />
@@ -42,13 +28,15 @@
     <PackageReference Include="AWSSDK.EC2" Version="3.3.134.9" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Views\LogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Views\SettingsView.xaml">
-      <Generator>MSBuild:Compile</Generator>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <Generator>MSBuild:compile</Generator>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -68,12 +56,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\LogView.xaml">
+    <EmbeddedResource Include="Views\DataGridView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\DataGridView.xaml">
+    <EmbeddedResource Include="Views\InstanceInfoView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
   </ItemGroup>

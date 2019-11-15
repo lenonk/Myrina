@@ -18,7 +18,9 @@
                 Name="CollapseButton"
                 MaxHeight="15" 
                 Margin="5,5,5,5" 
-                Grid.Column="2">v</Button>
+                Grid.Column="2">
+          <Image Source="/Assets/collapse.png" />
+        </Button>
       </Grid>
       <ListBox Height="100" 
                AutoScrollToSelectedItem="True" 

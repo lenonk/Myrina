@@ -19,7 +19,7 @@ namespace MyrinaUI.Views {
                             .OfType<DataGridRow>()
                             .FirstOrDefault();
 
-                        if (row != null) {
+                        if (row != null && !grid.SelectedItems.Contains(row.DataContext)) {
                             grid.SelectedIndex = row.GetIndex();
                         }
                     }

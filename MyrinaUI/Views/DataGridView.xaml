@@ -25,6 +25,7 @@
         SelectedItem="{Binding SInstance, Mode=TwoWay}"
         RowDetailsVisibilityMode="VisibleWhenSelected"
         MinWidth="720"
+        VerticalGridLinesBrush="{StaticResource ThemeControlHighBrush}"
         Items="{Binding EC2Instances}">
 
         <DataGrid.Styles>
@@ -70,7 +71,7 @@
         </DataGrid.Columns>
         <DataGrid.RowDetailsTemplate>
           <DataTemplate>
-            <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto, auto, auto, auto" >
+            <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto" >
               <!-- Row 0 -->
               <!-- Image ID -->
               <TextBlock Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="Image:" />
@@ -97,7 +98,6 @@
                          IsVisible="{Binding PublicDnsName, Converter={StaticResource NegativeStringToBoolConverter}}"
                          FontStyle="Italic" FontWeight="SemiBold" Foreground="DarkOrange" Text="No Public DNS" />
 
-              <!-- Row 1 -->
             </Grid>
           </DataTemplate>
         </DataGrid.RowDetailsTemplate>

@@ -117,10 +117,14 @@ namespace MyrinaUI.ViewModels {
         }
 
         public async void LaunchEC2Instance() {
+            try {
             var msg = await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                 SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
                 StartNumber, SVpc, SKey, EC2Tags);
-            LogViewModel.LogView.Log(msg);
+                LogViewModel.LogView.Log(msg);
+            } catch (AmazonEC2Exception e) {
+                LogViewModel.LogView.Log(e.Message);
+            }
         }
 
         // Data refresh methods
@@ -170,8 +174,7 @@ namespace MyrinaUI.ViewModels {
                     EC2Images.Add(new EC2Image { Name = "LM3 CDIA Integration", ImageId = "ami-03542d7c" });
                     SImage = SettingsFirstOrDefault(SettingsView.DefAmi, EC2Images);
                 }
-            } catch (Exception e) 
-                when (e is AmazonEC2Exception) {
+            } catch (AmazonEC2Exception e) {
                 LogViewModel.LogView.Log(e.Message);
             }
         }

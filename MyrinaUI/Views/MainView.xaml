@@ -13,9 +13,7 @@
     <cv:NegativeStringToBoolConverter x:Key="NegativeStringToBoolConverter" />
   </UserControl.Resources>
 
-     <Grid
-      ColumnDefinitions="5, auto, *, 5"
-      RowDefinitions="*, auto, 200, 5">
+     <Grid ColumnDefinitions="5, auto, *, 5" RowDefinitions="*, auto, 200, 5">
 
       <!-- Row 0 Col 1-->
       <v:DataGridView Grid.Row="0" Grid.Column="1" />
@@ -24,91 +22,7 @@
       <v:LogView Grid.Row="1" Grid.Column="1"/>
 
       <!-- Row 5 Col 0-->
-      <TabControl BorderBrush="#23404C" BorderThickness="1" Margin="0,2,2,0" Grid.Row="2" Grid.Column="1" DataContext="{Binding SInstance}">
-        <TabItem Header="Description">
-          <Panel>
-          <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto, auto, auto, auto">
-            <!-- Col 0 -->
-            <!-- Instance ID -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0" Text="Instance Id:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="1" Text="{Binding InstanceId}" />
-
-            <!-- Hypervisor type -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0" Text="Hypervisor Type:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="1" Text="{Binding Hypervisor}" />
-
-            <!-- VirtualizationType -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="0" Text="Virtualization Type:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="2" Grid.Column="1" Text="{Binding VirtualizationType}" />
-
-            <!-- Core Count -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="0" Text="Core Count:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="3" Grid.Column="1" Text="{Binding CpuOptions.CoreCount}" />
-
-            <!-- Threads per core -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="0" Text="Threads Per Core:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="4" Grid.Column="1" Text="{Binding CpuOptions.ThreadsPerCore}" />
-
-            <!-- Column 1 -->
-            <!-- Private DNS -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Text="Private DNS:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="0" Grid.Column="3" Text="{Binding PrivateDnsName}" />
-
-            <!-- Private IP -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="2" Text="Private IPs:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="1" Grid.Column="3" Text="{Binding PrivateIpAddress}" />
-
-            <!-- VPC Id -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="2" Text="VPC Id:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="2" Grid.Column="3" Text="{Binding VpcId}" />
-
-            <!-- Platform -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="2" Text="Platform:" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="3" Grid.Column="3" Text="{Binding Platform}" />
-            <TextBlock Margin="10,3,0,3" Grid.Row="3" Grid.Column="3" 
-                       IsVisible="{Binding Platform, Converter={StaticResource NegativeStringToBoolConverter}}" Text="Linux" />
-
-            <!-- Security Groups -->
-            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,3,0,3" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="2" Text="Security Groups:" />
-            <ItemsControl Grid.Row="4" Grid.Column="3" Items="{Binding SecurityGroups}">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Margin="10,3,0,3" Text="{Binding GroupName}" />
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-          </Grid>
-        </Panel>
-        </TabItem>
-        <TabItem Header="Status Checks"/>
-        <TabItem Header="Tags">
-          <Grid ColumnDefinitions="auto,*" RowDefinitions="auto">
-            <ItemsControl Grid.Row="0" Grid.Column="0" Items="{Binding Tags}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,5,0,3" Text="{Binding Key}" />
-                    <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="0,5,0,3" Text=":" />
-                  </StackPanel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <ItemsControl Grid.Row="0" Grid.Column="1" Items="{Binding Tags}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Margin="10,5,0,3" Text="{Binding Value}" />
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </Grid>
-        </TabItem>
-      </TabControl>
+       <v:InstanceInfoView Grid.Row="2" Grid.Column="1" DataContext="{Binding DataGridViewModel}" />
 
       <!-- Row 0 Col 5 -->
       <Border 

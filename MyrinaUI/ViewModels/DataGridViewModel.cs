@@ -11,18 +11,18 @@ namespace MyrinaUI.ViewModels {
         public ObservableCollection<Instance> EC2Instances { get; } = new ObservableCollection<Instance>();
         private DispatcherTimer _refreshTimer = new DispatcherTimer();
 
+        private Instance _sInstance;
+        public Instance SInstance {
+            get { return _sInstance; }
+            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
+        }
+
         public DataGridViewModel() {
             RefreshEC2Instances();
 
             _refreshTimer.Interval = TimeSpan.FromSeconds(30);
             _refreshTimer.Tick += (sender, e) => { RefreshEC2Instances(); };
-            //_refreshTimer.Start();
-        }
-
-        private Instance _sInstance;
-        public Instance SInstance {
-            get { return _sInstance; }
-            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
+            _refreshTimer.Start();
         }
 
         public async void RefreshEC2Instances() {
