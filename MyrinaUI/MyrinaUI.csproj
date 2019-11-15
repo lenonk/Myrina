@@ -20,24 +20,17 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Include="Assets\Amazon_EC2_36x36.png" />
+    <AvaloniaResource Include="Assets\collapse.png" />
+    <AvaloniaResource Include="Assets\expand.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.0-preview7" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0-preview7" />
     <PackageReference Include="AWSSDK.Core" Version="3.3.103.62" />
     <PackageReference Include="AWSSDK.EC2" Version="3.3.134.9" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Views\LogView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\MainView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\SettingsView.xaml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-      <Generator>MSBuild:compile</Generator>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Views\SettingsView.xaml.cs">
@@ -51,21 +44,27 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Views\LogControl.xaml">
+    <None Update="Views\DataGridView.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Views\DataGridView.xaml">
+    </None>
+    <None Update="Views\InstanceInfoView.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Views\InstanceInfoView.xaml">
+    </None>
+    <None Update="Views\LogControl.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\MainWindow.xaml">
+    </None>
+    <None Update="Views\LogView.xaml">
       <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
+    </None>
+    <None Update="Views\MainView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Views\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Views\SettingsView.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <Generator>MSBuild:compile</Generator>
+    </None>
   </ItemGroup>
 </Project>
