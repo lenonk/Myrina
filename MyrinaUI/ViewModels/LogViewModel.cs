@@ -12,6 +12,12 @@ namespace MyrinaUI.ViewModels {
 
         private ObservableCollection<string> LogItems { get; } = new ObservableCollection<string>();
 
+        private bool _listBoxisOpen = true;
+        public bool ListBoxIsOpen {
+            get { return _listBoxisOpen; }
+            set { this.RaiseAndSetIfChanged(ref _listBoxisOpen, value); }
+        }
+
         public LogViewModel() {
             LogView = this;
 
@@ -27,5 +33,8 @@ namespace MyrinaUI.ViewModels {
 
             LogItems.Add($"{DateTime.Now.ToString("HH:mm tt")}: {s}");
         }
+
+        public void CollapseListBox() => ListBoxIsOpen = false;
+        public void ExpandListBox() => ListBoxIsOpen = true;
     }
 }

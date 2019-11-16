@@ -118,10 +118,10 @@ namespace MyrinaUI.ViewModels {
 
         public async void LaunchEC2Instance() {
             try {
-            var msg = await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
-                SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
-                StartNumber, SVpc, SKey, EC2Tags);
-                LogViewModel.LogView.Log(msg);
+                var msg = await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
+                    SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
+                    StartNumber, SVpc, SKey, EC2Tags);
+                    LogViewModel.LogView.Log(msg);
             } catch (AmazonEC2Exception e) {
                 LogViewModel.LogView.Log(e.Message);
             }

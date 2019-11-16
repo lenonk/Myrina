@@ -2,10 +2,17 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace MyrinaUI.ViewModels {
     public class InstanceInfoViewModel : ViewModelBase {
+
+        private bool _isOpen = true;
+        public bool IsOpen {
+            get { return _isOpen; }
+            set { this.RaiseAndSetIfChanged(ref _isOpen, value); }
+        }
 
         private Instance _sInstance;
         public Instance SInstance {
@@ -14,11 +21,10 @@ namespace MyrinaUI.ViewModels {
         }
 
         public InstanceInfoViewModel() {
-            Instance a = new Instance();
-            a.InstanceId = "foo";
-            a.ImageId = "bar";
-
-            SInstance = a;
+            EventSystem.Subscribe<SelectedInstanceChanged>((x) => { SInstance = x.SInstance; });
         }
+
+        public void Collapse() => IsOpen = false;
+        public void Expand() => IsOpen = true;
     }
 }

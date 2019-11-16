@@ -14,7 +14,10 @@ namespace MyrinaUI.ViewModels {
         private Instance _sInstance;
         public Instance SInstance {
             get { return _sInstance; }
-            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
+            set { 
+                this.RaiseAndSetIfChanged(ref _sInstance, value);
+                EventSystem.Publish(new SelectedInstanceChanged { SInstance = value });
+            }
         }
 
         public DataGridViewModel() {
