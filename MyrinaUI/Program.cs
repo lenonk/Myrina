@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
+using MyrinaUI.Services;
 using MyrinaUI.ViewModels;
 using MyrinaUI.Views;
 
@@ -26,7 +27,8 @@ namespace MyrinaUI
         private static void AppMain(Application app, string[] args)
         {
             var window = new MainWindow();
-            window.DataContext = new MainWindowViewModel(window);
+            window.DataContext = new MainWindowViewModel();
+            ViewFinder.Initialize(window);
 
             app.Run(window);
         }

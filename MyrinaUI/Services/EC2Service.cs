@@ -5,17 +5,28 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using MyrinaUI.ViewModels;
-using System.Diagnostics;
+using System.Linq;
 
-namespace MyrinaUI.Utility {
-    static public class EC2Utility {
-        static string AccessKey = SettingsViewModel.Settings.AccessKey;
-        static string SecretKey = SettingsViewModel.Settings.SecretKey;
+namespace MyrinaUI.Services {
+    public sealed class EC2Service {
+        private static readonly Lazy<EC2Service> lazy = 
+            new Lazy<EC2Service>(() => new EC2Service());
 
-        static public async Task<string> LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
+        public static EC2Service Instance { get { return lazy.Value; } }
+
+        private EC2Service() {
+
+            EventSystem.Subscribe<AccessKeyChanged>((x) => { AccessKey = x.value; });
+            EventSystem.Subscribe<SecretKeyChanged>((x) => { SecretKey = x.value; });
+        }
+
+        private string AccessKey = Settings.Current.AccessKey;
+        private string SecretKey = Settings.Current.SecretKey;
+
+        public async Task<string> LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
             string SSubnet, string SAmi, bool UsePublicIp, 
-            ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, KeyPairInfo key, ObservableCollection<Tag> tags = null) {
+            ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, 
+            KeyPairInfo key, ObservableCollection<Tag> tags = null) {
 
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             RunInstancesRequest req = new RunInstancesRequest();
@@ -25,72 +36,30 @@ namespace MyrinaUI.Utility {
             req.ImageId = SAmi;
             req.MinCount = 1;
             req.MaxCount = startnum;
-            req.SecurityGroupIds = new List<string>();
             if (key.KeyFingerprint != "0xdeadbeef")
                 req.KeyName = key.KeyName;
 
-            if (SSubnet == "(Default)") SSubnet = "";
-            if (UsePublicIp) {
-                req.NetworkInterfaces = new List<InstanceNetworkInterfaceSpecification>();
-                req.NetworkInterfaces.Add(new InstanceNetworkInterfaceSpecification() {
-                    AssociatePublicIpAddress = true,
-                    DeleteOnTermination = true,
-                    DeviceIndex = 0,
-                    SubnetId = SSubnet
-                }); 
-                foreach (var sgroup in sgroups) {
-                    req.NetworkInterfaces[0].Groups.Add(sgroup.GroupId);
-                }
-            }
-            else {
-                req.SubnetId = SSubnet;
-                foreach (var sgroup in sgroups) {
-                    req.SecurityGroupIds.Add(sgroup.GroupId);
-                }
-            }
+            SetSubnetAndSecurityGroups(req, SSubnet, sgroups, UsePublicIp);
 
-            req.TagSpecifications = new List<TagSpecification>();
-            req.TagSpecifications.Add(new TagSpecification() {
-                ResourceType = ResourceType.Instance,
-                Tags = new List<Tag>()
-            });
-
-            // Add Default Tags
-            foreach (Tag t in SettingsViewModel.Settings.DefTags) {
-                req.TagSpecifications[0].Tags.Add(t);
-            }
-
-            // Add instance specific tags
-            if (tags != null) {
-                foreach (Tag newtag in tags) {
-                    bool found = false;
-                    foreach (Tag deftag in req.TagSpecifications[0].Tags) {
-                        if (deftag.Key == newtag.Key) {
-                            req.TagSpecifications[0].Tags.Remove(deftag);
-                            found = true;
-                            break;
-                        }
-                        if (found) break;
-                    }
-
-                    req.TagSpecifications[0].Tags.Add(newtag);
-                }
-            }
+            // Add default tags
+            AddTagsToInstance(req, Settings.Current.Tags);
+            // Add instance specific tags, overwriting defaults
+            AddTagsToInstance(req, tags);
 
             RunInstancesResponse resp;
 
             var result = await Task.Run(async () => {
-                try { resp = await client.RunInstancesAsync(req); } 
+                try { resp = await client.RunInstancesAsync(req); }
                 catch (AmazonEC2Exception e) { throw e; }
-                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                        throw new AmazonEC2Exception($"EC2 function: RunInstancesAsync() " +
-                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
-                    }
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: RunInstancesAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
 
                 string msgs = "";
-                    foreach (Instance instance in resp.Reservation.Instances) {
-                        msgs += $"Sucessfully started instance id: {instance.InstanceId}";
-                    }
+                foreach (Instance instance in resp.Reservation.Instances) {
+                    msgs += $"Sucessfully started instance id: {instance.InstanceId}";
+                }
 
                 return msgs;
             });
@@ -98,7 +67,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
         
-        static public async Task<string> TerminateEC2Instance(string instance) {
+        public async Task<string> TerminateEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new TerminateInstancesRequest();
 
@@ -119,7 +88,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<string> StartEC2Instance(string instance) {
+        public async Task<string> StartEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new StartInstancesRequest();
 
@@ -141,7 +110,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<string> StopEC2Instance(string instance) {
+        public async Task<string> StopEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new StopInstancesRequest();
 
@@ -163,7 +132,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<string> RebootEC2Instance(string instance) {
+        public async Task<string> RebootEC2Instance(string instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new RebootInstancesRequest();
 
@@ -185,7 +154,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2InstanceTypes(ObservableCollection<string> col) {
+        public async Task<int> GetEC2InstanceTypes(ObservableCollection<string> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _types = new List<string>();
 
@@ -216,7 +185,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2InstanceTags(Instance instance) {
+        public async Task<int> GetEC2InstanceTags(Instance instance) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _tags = new List<Tag>();
 
@@ -245,7 +214,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
         
-        static public async Task<int> GetEC2Instances(ObservableCollection<Instance> col) {
+         public async Task<int> GetEC2Instances(ObservableCollection<Instance> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _instances = new List<Instance>();
 
@@ -277,7 +246,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null) {
+         public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _groups = new List<SecurityGroup>();
             
@@ -308,7 +277,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2Vpcs(ObservableCollection<Vpc> col) {
+         public async Task<int> GetEC2Vpcs(ObservableCollection<Vpc> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _vpcs = new List<Vpc>();
             var req = new DescribeVpcsRequest();
@@ -346,7 +315,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2AvailabilityZones(ObservableCollection<string> col) {
+         public async Task<int> GetEC2AvailabilityZones(ObservableCollection<string> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _zones = new List<string>();
 
@@ -379,7 +348,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null) {
+         public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _subnets = new List<Subnet>();
 
@@ -421,7 +390,7 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col) {
+         public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _pairs = new List<KeyPairInfo>();
 
@@ -450,7 +419,8 @@ namespace MyrinaUI.Utility {
             return result;
         }
 
-        static private void SortTagsAndAddName(List<Tag> tags, string value = null) {
+        #region Helper Functions
+         private void SortTagsAndAddName(List<Tag> tags, string value = null) {
             if (tags == null)
                 tags = new List<Tag>();
 
@@ -468,7 +438,52 @@ namespace MyrinaUI.Utility {
             });
         }
 
-        /*static private void AddFilter(List<Filter> flist, string name, string value) {
+         private void AddTagsToInstance(RunInstancesRequest req, 
+            ObservableCollection<Tag> tags) {
+            if (tags == null) return;
+
+            if (req.TagSpecifications.Count == 0) {
+                req.TagSpecifications.Add(new TagSpecification() {
+                    ResourceType = ResourceType.Instance,
+                    Tags = new List<Tag>()
+                });
+            }
+            var taglist = req.TagSpecifications[0].Tags;
+
+            tags.ToList().ForEach((tag) => {
+                taglist.Remove(taglist.Where((x) => x.Key == tag.Key).FirstOrDefault());
+                req.TagSpecifications[0].Tags.Add(tag);
+            });
+
+        }
+
+         private void SetSubnetAndSecurityGroups(RunInstancesRequest req, string subnet, 
+            ObservableCollection<SecurityGroup> groups, bool publicIp) {
+            if (groups.Count > 0)
+                req.SecurityGroupIds = new List<string>();
+            
+            if (publicIp) {
+                req.NetworkInterfaces = new List<InstanceNetworkInterfaceSpecification>();
+                req.NetworkInterfaces.Add(new InstanceNetworkInterfaceSpecification() {
+                    AssociatePublicIpAddress = true,
+                    DeleteOnTermination = true,
+                    DeviceIndex = 0,
+                    SubnetId = subnet
+                }); 
+                foreach (var sgroup in groups) {
+                    req.NetworkInterfaces[0].Groups.Add(sgroup.GroupId);
+                }
+            }
+            else {
+                req.SubnetId = subnet;
+                foreach (var sgroup in groups) {
+                    req.SecurityGroupIds.Add(sgroup.GroupId);
+                }
+            }
+        }
+        #endregion
+
+        /* private void AddFilter(List<Filter> flist, string name, string value) {
             Filter f = new Filter();
             f.Values = new List<string>();
 
@@ -478,7 +493,7 @@ namespace MyrinaUI.Utility {
             flist.Add(f);
         }
 
-        static public async Task GetEC2Amis(ObservableCollection<Image> col) {
+         public async Task GetEC2Amis(ObservableCollection<Image> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             DescribeImagesRequest req = new DescribeImagesRequest();
             req.ExecutableUsers = new List<string>();
@@ -510,5 +525,6 @@ namespace MyrinaUI.Utility {
                 throw e;
             }
         }*/
+
     }
 }

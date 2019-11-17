@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using ReactiveUI;
-using Avalonia.Controls;
 using Amazon.EC2;
 using Amazon.EC2.Model;
 using System.Reactive.Linq;
 using System.Reflection;
-using MyrinaUI.Utility;
+using MyrinaUI.Services;
+using MyrinaUI.Views;
 
 namespace MyrinaUI.ViewModels {
     using EC2Image = Amazon.EC2.Model.Image;
@@ -24,12 +24,8 @@ namespace MyrinaUI.ViewModels {
         public ObservableCollection<KeyPairInfo> EC2KeyPairs { get; set; } = new ObservableCollection<KeyPairInfo>();
         public ObservableCollection<Tag> EC2Tags { get; } = new ObservableCollection<Tag>();
 
-        // Private class members
-        private static Window MainWindow;
-
         // Properties
         #region Properties
-
         private string _sInstanceType;
         public string SInstanceType {
             get { return _sInstanceType; }
@@ -72,12 +68,6 @@ namespace MyrinaUI.ViewModels {
             set { this.RaiseAndSetIfChanged(ref _sVpc, value); }
         }
 
-        private SettingsViewModel _settingsView;
-        public SettingsViewModel SettingsView {
-            get { return _settingsView; }
-            set { this.RaiseAndSetIfChanged(ref _settingsView, value); }
-        }
-
         private bool _usePublicIp = true;
         public bool UsePublicIp {
             get { return _usePublicIp; }
@@ -92,11 +82,16 @@ namespace MyrinaUI.ViewModels {
         #endregion
 
         // Constructor
-        public MainViewModel(Window parent) {
-            MainWindow = parent;
-            SettingsView = new SettingsViewModel(parent);
+        public MainViewModel() {
+            EventSystem.Subscribe<SettingsChanged>((x) => { RefreshEC2AllData(); });
 
-            Initialize();
+            RefreshEC2AllData();
+
+            this.WhenAnyValue(x => x.SVpc).Subscribe((x) => {
+                if (x == null) return;
+                RefreshEC2Subnets(); 
+                RefreshEC2SecurityGroups(); 
+            });
         }
 
         // Methods
@@ -104,21 +99,11 @@ namespace MyrinaUI.ViewModels {
         public void DeleteSecurityGroup(SecurityGroup group) => ActiveSecurityGroups.Remove(group);
         public void AddTag() => EC2Tags.Add(new Tag() { Key = "", Value = "" });
         public void DeleteTag(Tag key) => EC2Tags.Remove(key);
-        public void ShowSettings() => SettingsView.Show();
-
-        private void Initialize() {
-
-            RefreshEC2AllData();
-
-            this.WhenAnyValue(x => x.SVpc).Subscribe((x) => { 
-                RefreshEC2Subnets(); 
-                RefreshEC2SecurityGroups(); 
-            });
-        }
+        public void ShowSettings() => ViewFinder.Get<SettingsView>().Show();
 
         public async void LaunchEC2Instance() {
             try {
-                var msg = await EC2Utility.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
+                var msg = await EC2Service.Instance.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                     SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
                     StartNumber, SVpc, SKey, EC2Tags);
                     LogViewModel.LogView.Log(msg);
@@ -142,44 +127,45 @@ namespace MyrinaUI.ViewModels {
         private async void RefreshAmazonData(AmazonRefreshCode code) {
             try {
                 if (code == AmazonRefreshCode.Vpcs || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2Vpcs(EC2Vpcs)
-                        .ContinueWith(_ => SVpc = SettingsFirstOrDefault(SettingsView.DefVpc, EC2Vpcs, "VpcId"));
+                    await EC2Service.Instance.GetEC2Vpcs(EC2Vpcs)
+                        .ContinueWith(_ => SVpc = SettingsFirstOrDefault(Settings.Current.Vpc, EC2Vpcs, "VpcId"));
                 }
                 if (code == AmazonRefreshCode.Zones || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2AvailabilityZones(EC2AvailabilityZones)
-                        .ContinueWith(_ => SAvailabilityZone = SettingsFirstOrDefault(SettingsView.DefZone, EC2AvailabilityZones));
+                    await EC2Service.Instance.GetEC2AvailabilityZones(EC2AvailabilityZones)
+                        .ContinueWith(_ => SAvailabilityZone = SettingsFirstOrDefault(Settings.Current.Zone, EC2AvailabilityZones));
                 }
                 if (code == AmazonRefreshCode.Types || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2InstanceTypes(EC2InstanceTypes)
-                        .ContinueWith(_ => SInstanceType = SettingsFirstOrDefault(SettingsView.DefInstanceSize, EC2InstanceTypes));
+                    await EC2Service.Instance.GetEC2InstanceTypes(EC2InstanceTypes)
+                        .ContinueWith(_ => SInstanceType = SettingsFirstOrDefault(Settings.Current.InstanceType, EC2InstanceTypes));
                 }
                 if (code == AmazonRefreshCode.Subnets || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2Subnets(EC2Subnets, SVpc)
+                    await EC2Service.Instance.GetEC2Subnets(EC2Subnets, SVpc)
                         .ContinueWith(_ => SSubnet = SettingsFirstOrDefault("", EC2Subnets));
                 }
                 if (code == AmazonRefreshCode.SecurityGroups || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2SecurityGroups(EC2SecurityGroups, SVpc)
+                    await EC2Service.Instance.GetEC2SecurityGroups(EC2SecurityGroups, SVpc)
                         .ContinueWith(_ => SSecurityGroup = SettingsFirstOrDefault("", EC2SecurityGroups));
                 }
                 if (code == AmazonRefreshCode.KeyPairs || code == AmazonRefreshCode.All) {
-                    await EC2Utility.GetEC2KeyPairs(EC2KeyPairs)
+                    await EC2Service.Instance.GetEC2KeyPairs(EC2KeyPairs)
                         .ContinueWith(_ => SKey = SettingsFirstOrDefault("not implemented" /*SKey.DefKeyName*/, EC2KeyPairs));
                 }
                 if (code == AmazonRefreshCode.Images || code == AmazonRefreshCode.All) {
                     // TODO: Pull these from the api
                     //await EC2Utility.GetEC2Images(EC2Images);
+                    EC2Images.Clear();
                     EC2Images.Add(new EC2Image { Name = "TMC CDIA Development", ImageId = "ami-4212963d" });
                     EC2Images.Add(new EC2Image { Name = "TMC CDIA Integration", ImageId = "ami-c0e725bd" });
                     EC2Images.Add(new EC2Image { Name = "TMC CDIA Master", ImageId = "ami-69dc1e14" });
                     EC2Images.Add(new EC2Image { Name = "LM3 CDIA Integration", ImageId = "ami-03542d7c" });
-                    SImage = SettingsFirstOrDefault(SettingsView.DefAmi, EC2Images);
+                    SImage = SettingsFirstOrDefault(Settings.Current.Image, EC2Images, "ImageId");
                 }
             } catch (AmazonEC2Exception e) {
                 LogViewModel.LogView.Log(e.Message);
             }
         }
 
-        public void RefreshEC2AvailibilityZones() => RefreshAmazonData(AmazonRefreshCode.Zones);
+        //public void RefreshEC2AvailibilityZones() => RefreshAmazonData(AmazonRefreshCode.Zones);
         public void RefreshEC2InstanceTypes() => RefreshAmazonData(AmazonRefreshCode.Types);
         public void RefreshEC2SecurityGroups() => RefreshAmazonData(AmazonRefreshCode.SecurityGroups);
         public void RefreshEC2Vpcs() => RefreshAmazonData(AmazonRefreshCode.Vpcs);

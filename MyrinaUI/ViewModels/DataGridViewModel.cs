@@ -1,7 +1,7 @@
 ﻿using Amazon.EC2;
 using Amazon.EC2.Model;
 using Avalonia.Threading;
-using MyrinaUI.Utility;
+using MyrinaUI.Services;
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
@@ -14,14 +14,13 @@ namespace MyrinaUI.ViewModels {
         private Instance _sInstance;
         public Instance SInstance {
             get { return _sInstance; }
-            set { 
-                this.RaiseAndSetIfChanged(ref _sInstance, value);
-                EventSystem.Publish(new SelectedInstanceChanged { SInstance = value });
-            }
+            set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
         }
 
         public DataGridViewModel() {
             RefreshEC2Instances();
+
+            this.WhenAnyValue(x => x.SInstance).Subscribe((x) => EventSystem.Publish(x));
 
             _refreshTimer.Interval = TimeSpan.FromSeconds(30);
             _refreshTimer.Tick += (sender, e) => { RefreshEC2Instances(); };
@@ -30,7 +29,7 @@ namespace MyrinaUI.ViewModels {
 
         public async void RefreshEC2Instances() {
             Instance si = SInstance;
-            await EC2Utility.GetEC2Instances(EC2Instances)
+            await EC2Service.Instance.GetEC2Instances(EC2Instances)
                 .ContinueWith(_ => ResetSelectedInstance(si));
         }
 
@@ -62,19 +61,19 @@ namespace MyrinaUI.ViewModels {
                 string msg;
                 switch (code) {
                     case AmazonCommand.Reboot:
-                        msg = await EC2Utility.RebootEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.RebootEC2Instance(SInstance.InstanceId);
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Start:
-                        msg = await EC2Utility.StartEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.StartEC2Instance(SInstance.InstanceId);
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Stop:
-                        msg = await EC2Utility.StopEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.StopEC2Instance(SInstance.InstanceId);
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Terminate:
-                        msg = await EC2Utility.TerminateEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.TerminateEC2Instance(SInstance.InstanceId);
                         LogViewModel.LogView.Log(msg);
                         break;
                     default:

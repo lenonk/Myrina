@@ -41,8 +41,7 @@
             <v:SettingsView Grid.Row="0" Grid.Column="0"
                                    Grid.RowSpan="4" Grid.ColumnSpan="2"
                                    Opacity="0" ZIndex="-1"
-                                   Name="Settings"
-                                   DataContext="{Binding SettingsView}">
+                                   Name="Settings">
               <v:SettingsView.Transitions>
                 <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
               </v:SettingsView.Transitions>

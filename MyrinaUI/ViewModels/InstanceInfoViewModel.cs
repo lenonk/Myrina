@@ -1,9 +1,6 @@
 ﻿using Amazon.EC2.Model;
+using MyrinaUI.Services;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 
 namespace MyrinaUI.ViewModels {
     public class InstanceInfoViewModel : ViewModelBase {
@@ -21,7 +18,7 @@ namespace MyrinaUI.ViewModels {
         }
 
         public InstanceInfoViewModel() {
-            EventSystem.Subscribe<SelectedInstanceChanged>((x) => { SInstance = x.SInstance; });
+            EventSystem.Subscribe<Instance>((x) => { SInstance = x; });
         }
 
         public void Collapse() => IsOpen = false;

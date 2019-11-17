@@ -6,8 +6,8 @@ namespace MyrinaUI.ViewModels
 
         public MainViewModel MainView { get; }
 
-        public MainWindowViewModel(Window parent) {
-            MainView = new MainViewModel(parent);
+        public MainWindowViewModel() {
+            MainView = new MainViewModel();
         }
     }
 }

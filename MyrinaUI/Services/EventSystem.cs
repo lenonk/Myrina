@@ -1,12 +1,9 @@
 ﻿using Amazon.EC2.Model;
 using Prism.Events;
 using System;
+using System.Collections.ObjectModel;
 
-namespace MyrinaUI {
-    public class SelectedInstanceChanged {
-        public Instance SInstance { get; set; }
-    }
-
+namespace MyrinaUI.Services {
     public static class EventSystem {
         private static IEventAggregator _current;
         public static IEventAggregator Current {

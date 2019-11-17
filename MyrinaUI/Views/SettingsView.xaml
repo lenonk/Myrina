@@ -2,9 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="800"
              x:Class="MyrinaUI.Views.SettingsView"
              d:DataContext="{Binding SettingsViewModel}">
+
+  <UserControl.DataContext>
+    <vm:SettingsViewModel />
+  </UserControl.DataContext>
 
   <Border Margin="-1,-1,-1,-1"
           BorderBrush="#23404C"
@@ -31,19 +36,19 @@
           <Grid RowDefinitions="auto, auto, auto, auto" ColumnDefinitions="*, *">
             <!-- Zone -->
             <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="Availability Zone:" />
-            <TextBox Margin="10,0,5,10" Grid.Row="1" Grid.Column="0" Text="{Binding DefZone}"/>
+            <TextBox Margin="10,0,5,10" Grid.Row="1" Grid.Column="0" Text="{Binding Zone}"/>
 
             <!-- Instance Size -->
             <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="Instance Type:" />
-            <TextBox Margin="5,0,10,10" Grid.Row="1" Grid.Column="1" Text="{Binding DefInstanceSize}"/>
+            <TextBox Margin="5,0,10,10" Grid.Row="1" Grid.Column="1" Text="{Binding InstanceType}"/>
 
             <!-- Subnet -->
             <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Text="VPC Id:" />
-            <TextBox Margin="10,0,5,10" Grid.Row="3" Grid.Column="0" Text="{Binding DefVpc}"/>
+            <TextBox Margin="10,0,5,10" Grid.Row="3" Grid.Column="0" Text="{Binding Vpc}"/>
 
             <!-- Ami -->
             <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" Text="Image:" />
-            <TextBox Margin="5,0,10,10" Grid.Row="3" Grid.Column="1" Text="{Binding DefAmi}"/>
+            <TextBox Margin="5,0,10,10" Grid.Row="3" Grid.Column="1" Text="{Binding Image}"/>
 
           </Grid>
         </TabItem>
@@ -55,7 +60,7 @@
             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
               <Grid RowDefinitions="auto,*">
                 <Button MinHeight="30" Grid.Row="0" Margin="10,2,10,10" Content="Add Default Tag" Command="{Binding AddTag}" />
-                <ItemsControl Grid.Row="1" Name="TagsControl" Items="{Binding DefTags}">
+                <ItemsControl Grid.Row="1" Name="TagsControl" Items="{Binding Tags}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
                       <!-- This needs to be a user control to be inserted programatically -->
