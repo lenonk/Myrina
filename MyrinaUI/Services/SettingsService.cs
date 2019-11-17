@@ -26,6 +26,7 @@ namespace MyrinaUI.Services {
             EventSystem.Subscribe<ImageChanged>((x) => { Image = x.value; });
             EventSystem.Subscribe<VpcChanged>((x) => { Vpc = x.value; });
             EventSystem.Subscribe<TagsChanged>((x) => { Tags = x.value; });
+            EventSystem.Subscribe<KeyPairChanged>((x) => { KeyPair = x.value; });
         }
 
         private class SettingsProperties {
@@ -35,6 +36,7 @@ namespace MyrinaUI.Services {
             public string InstanceType { get; set; }
             public string Image { get; set; }
             public string Vpc { get; set; }
+            public string KeyPair { get; set; }
             public ObservableCollection<Tag> Tags { get; set; } = new ObservableCollection<Tag>();
         }
 
@@ -63,6 +65,10 @@ namespace MyrinaUI.Services {
         public string Vpc { 
             get { return _settings.Vpc; }
             private set { _settings.Vpc = value; }
+        }
+        public string KeyPair { 
+            get { return _settings.KeyPair; }
+            private set { _settings.KeyPair = value; }
         }
         public ObservableCollection<Tag> Tags {
             get { return _settings.Tags; } 

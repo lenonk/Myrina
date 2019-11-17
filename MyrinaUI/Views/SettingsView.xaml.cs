@@ -12,7 +12,6 @@ namespace MyrinaUI.Views {
         }
 
         public void Show() {
-            IsVisible = true;
             Opacity = 1;
             ZIndex = 99;
         }
@@ -20,7 +19,6 @@ namespace MyrinaUI.Views {
         public void Hide() {
             Opacity = 0;
             ZIndex = -1;
-            IsVisible = false;
         }
 
         /*public async Task<int> SlideIn(TimeSpan time) {

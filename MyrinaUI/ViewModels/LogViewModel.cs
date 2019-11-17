@@ -1,10 +1,6 @@
-﻿using Avalonia.Controls;
-using Avalonia.VisualTree;
-using MyrinaUI.Views;
-using ReactiveUI;
+﻿using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace MyrinaUI.ViewModels {
     public class LogViewModel : ViewModelBase {

@@ -87,8 +87,9 @@ namespace MyrinaUI.ViewModels {
 
             RefreshEC2AllData();
 
-            this.WhenAnyValue(x => x.SVpc).Subscribe((x) => {
-                if (x == null) return;
+            this.WhenAnyValue(x => x.SVpc)
+                .Where(x => x != null)
+                .Subscribe((x) => {
                 RefreshEC2Subnets(); 
                 RefreshEC2SecurityGroups(); 
             });
@@ -148,7 +149,7 @@ namespace MyrinaUI.ViewModels {
                 }
                 if (code == AmazonRefreshCode.KeyPairs || code == AmazonRefreshCode.All) {
                     await EC2Service.Instance.GetEC2KeyPairs(EC2KeyPairs)
-                        .ContinueWith(_ => SKey = SettingsFirstOrDefault("not implemented" /*SKey.DefKeyName*/, EC2KeyPairs));
+                        .ContinueWith(_ => SKey = SettingsFirstOrDefault(Settings.Current.KeyPair, EC2KeyPairs, "KeyName"));
                 }
                 if (code == AmazonRefreshCode.Images || code == AmazonRefreshCode.All) {
                     // TODO: Pull these from the api

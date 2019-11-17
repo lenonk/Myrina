@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-
+﻿
 namespace MyrinaUI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase {

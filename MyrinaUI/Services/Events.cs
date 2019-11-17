@@ -1,8 +1,5 @@
 ﻿using Amazon.EC2.Model;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace MyrinaUI.Services {
     public class AccessKeyChanged {  public string value { get; set; } }
@@ -12,5 +9,6 @@ namespace MyrinaUI.Services {
     public class ImageChanged {  public string value { get; set; } }
     public class VpcChanged {  public string value { get; set; } }
     public class TagsChanged {  public ObservableCollection<Tag> value { get; set; } }
+    public class KeyPairChanged {  public string value { get; set; } }
     public class SettingsChanged { }
 }
