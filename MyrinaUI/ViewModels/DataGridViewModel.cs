@@ -8,8 +8,9 @@ using System.Collections.ObjectModel;
 
 namespace MyrinaUI.ViewModels {
     public class DataGridViewModel : ViewModelBase {
-        public ObservableCollection<Instance> EC2Instances { get; } = new ObservableCollection<Instance>();
         private DispatcherTimer _refreshTimer = new DispatcherTimer();
+
+        public ObservableCollection<Instance> EC2Instances { get; } = new ObservableCollection<Instance>();
 
         private Instance _sInstance;
         public Instance SInstance {
@@ -18,9 +19,10 @@ namespace MyrinaUI.ViewModels {
         }
 
         public DataGridViewModel() {
-            RefreshEC2Instances();
-
+            EventSystem.Subscribe<SettingsChanged>((x) => { RefreshEC2Instances(); });
             this.WhenAnyValue(x => x.SInstance).Subscribe((x) => EventSystem.Publish(x));
+
+            RefreshEC2Instances();
 
             _refreshTimer.Interval = TimeSpan.FromSeconds(30);
             _refreshTimer.Tick += (sender, e) => { RefreshEC2Instances(); };
@@ -28,6 +30,10 @@ namespace MyrinaUI.ViewModels {
         }
 
         public async void RefreshEC2Instances() {
+            if (string.IsNullOrWhiteSpace(Settings.Current.AccessKey) ||
+                string.IsNullOrWhiteSpace(Settings.Current.SecretKey))
+                return;
+
             Instance si = SInstance;
             await EC2Service.Instance.GetEC2Instances(EC2Instances)
                 .ContinueWith(_ => ResetSelectedInstance(si));

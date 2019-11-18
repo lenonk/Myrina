@@ -7,6 +7,8 @@ using MyrinaUI.Services;
 using Amazon.EC2;
 using System.Reflection;
 using System.Reactive.Linq;
+using System.Diagnostics;
+using System.Reactive;
 
 namespace MyrinaUI.ViewModels {
     public class SettingsViewModel : ViewModelBase {
@@ -42,19 +44,19 @@ namespace MyrinaUI.ViewModels {
             set { this.RaiseAndSetIfChanged(ref _sInstanceType, value); }
         }
 
-        private Image _sImage = new Image();
+        private Image _sImage;
         public Image SImage {
             get { return _sImage; }
             set { this.RaiseAndSetIfChanged(ref _sImage, value); }
         }
 
-        private Vpc _sVpc = new Vpc();
+        private Vpc _sVpc;
         public Vpc SVpc {
             get { return _sVpc; }
             set { this.RaiseAndSetIfChanged(ref _sVpc, value); }
         }
 
-        private KeyPairInfo _sKey = new KeyPairInfo();
+        private KeyPairInfo _sKey;
         public KeyPairInfo SKey {
             get { return _sKey; }
             set { this.RaiseAndSetIfChanged(ref _sKey, value); }
@@ -68,25 +70,49 @@ namespace MyrinaUI.ViewModels {
         #endregion
 
         public SettingsViewModel() {
+            const int AccessKeyLength = 20;
+            const int SecretKeyLength = 40;
 
             RefreshEC2AllData();
 
-            this.WhenAnyValue(x => x.AccessKey).Skip(2)
+            this.WhenAnyValue(x => x.AccessKey).Skip(1)
+                .Where(x => x != null)
+                .Throttle(TimeSpan.FromMilliseconds(500))
                 .Subscribe(x => EventSystem.Publish(new AccessKeyChanged() { value = x }));
-            this.WhenAnyValue(x => x.SecretKey).Skip(2)
+
+            this.WhenAnyValue(x => x.SecretKey).Skip(1)
+                .Where(x => x != null)
+                .Throttle(TimeSpan.FromMilliseconds(500))
                 .Subscribe(x => EventSystem.Publish(new SecretKeyChanged() { value = x }));
-            this.WhenAnyValue(x => x.SZone).Skip(2)
+
+            this.WhenAnyValue(x => x.SZone).Skip(1)
+                .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new ZoneChanged() { value = x }));
-            this.WhenAnyValue(x => x.SInstanceType).Skip(2)
+            this.WhenAnyValue(x => x.SInstanceType).Skip(1)
+                .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new InstanceTypeChanged() { value = x }));
-            this.WhenAnyValue(x => x.SImage).Skip(2)
+            this.WhenAnyValue(x => x.SImage).Skip(1)
+                .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new ImageChanged() { value = x.ImageId}));
-            this.WhenAnyValue(x => x.SVpc).Skip(2)
+            this.WhenAnyValue(x => x.SVpc).Skip(1)
+                .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new VpcChanged() { value = x.VpcId }));
-            this.WhenAnyValue(x => x.SKey).Skip(2)
+            this.WhenAnyValue(x => x.SKey).Skip(1)
+                .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new KeyPairChanged() { value = x.KeyName }));
-            this.WhenAnyValue(x => x.Tags).Skip(2)
+            this.WhenAnyValue(x => x.Tags).Skip(1)
+                .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new TagsChanged() { value = x }));
+
+            this.WhenAnyValue(x => x.AccessKey, y => y.SecretKey)
+                .Where((x) =>
+                    !string.IsNullOrWhiteSpace(x.Item1) &&
+                    !string.IsNullOrWhiteSpace(x.Item2) &&
+                    x.Item1.Length >= AccessKeyLength &&
+                    x.Item2.Length >= SecretKeyLength)
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => RefreshEC2AllData());
         }
 
         public void AddTag() => Tags.Add(new Tag() { Key = "", Value = "" });

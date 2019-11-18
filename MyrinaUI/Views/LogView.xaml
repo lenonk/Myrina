@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
              mc:Ignorable="d" d:DesignWidth="765" d:DesignHeight="100" Name="LogView"
              x:Class="MyrinaUI.Views.LogView">
-  
+
   <UserControl.DataContext>
     <vm:LogViewModel />
   </UserControl.DataContext>

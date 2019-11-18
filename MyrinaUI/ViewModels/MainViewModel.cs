@@ -12,7 +12,6 @@ namespace MyrinaUI.ViewModels {
     using EC2Image = Amazon.EC2.Model.Image;
 
     public class MainViewModel : ViewModelBase {
-
         // Public class members
         public ObservableCollection<string> EC2InstanceTypes { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> EC2AvailabilityZones { get; } = new ObservableCollection<string>();
@@ -89,6 +88,7 @@ namespace MyrinaUI.ViewModels {
 
             this.WhenAnyValue(x => x.SVpc)
                 .Where(x => x != null)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe((x) => {
                 RefreshEC2Subnets(); 
                 RefreshEC2SecurityGroups(); 

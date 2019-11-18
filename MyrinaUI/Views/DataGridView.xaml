@@ -16,7 +16,7 @@
     <cv:NegativeStringToBoolConverter x:Key="NegativeStringToBoolConverter" />
   </UserControl.Resources>
   
-  <Border Margin="0,2,4,0" Grid.Row="0" Grid.Column="1" BorderBrush="#23404C" BorderThickness="1">
+  <Border Margin="0,2,4,0" BorderBrush="#23404C" BorderThickness="1">
     <ScrollViewer Margin="4,4,4,4" HorizontalScrollBarVisibility="Auto">
       <DataGrid Name="instanceGrid" GridLinesVisibility="Vertical" Margin="0,0,3,0"
         VerticalAlignment="Top"

@@ -214,7 +214,7 @@ namespace MyrinaUI.Services {
             return result;
         }
         
-         public async Task<int> GetEC2Instances(ObservableCollection<Instance> col) {
+        public async Task<int> GetEC2Instances(ObservableCollection<Instance> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _instances = new List<Instance>();
 
@@ -246,7 +246,7 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-         public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null) {
+        public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _groups = new List<SecurityGroup>();
             
@@ -277,7 +277,7 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-         public async Task<int> GetEC2Vpcs(ObservableCollection<Vpc> col) {
+        public async Task<int> GetEC2Vpcs(ObservableCollection<Vpc> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _vpcs = new List<Vpc>();
             var req = new DescribeVpcsRequest();
@@ -315,7 +315,7 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-         public async Task<int> GetEC2AvailabilityZones(ObservableCollection<string> col) {
+        public async Task<int> GetEC2AvailabilityZones(ObservableCollection<string> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _zones = new List<string>();
 
@@ -348,7 +348,7 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-         public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null) {
+        public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _subnets = new List<Subnet>();
 
@@ -390,7 +390,7 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-         public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col) {
+        public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _pairs = new List<KeyPairInfo>();
 
@@ -420,7 +420,7 @@ namespace MyrinaUI.Services {
         }
 
         #region Helper Functions
-         private void SortTagsAndAddName(List<Tag> tags, string value = null) {
+        private void SortTagsAndAddName(List<Tag> tags, string value = null) {
             if (tags == null)
                 tags = new List<Tag>();
 
@@ -438,7 +438,7 @@ namespace MyrinaUI.Services {
             });
         }
 
-         private void AddTagsToInstance(RunInstancesRequest req, 
+        private void AddTagsToInstance(RunInstancesRequest req, 
             ObservableCollection<Tag> tags) {
             if (tags == null) return;
 
@@ -457,7 +457,7 @@ namespace MyrinaUI.Services {
 
         }
 
-         private void SetSubnetAndSecurityGroups(RunInstancesRequest req, string subnet, 
+        private void SetSubnetAndSecurityGroups(RunInstancesRequest req, string subnet, 
             ObservableCollection<SecurityGroup> groups, bool publicIp) {
             if (groups.Count > 0)
                 req.SecurityGroupIds = new List<string>();
