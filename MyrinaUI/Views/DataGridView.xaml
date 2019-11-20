@@ -15,9 +15,13 @@
     <cv:StringToBoolConverter x:Key="StringToBoolConverter" />
     <cv:NegativeStringToBoolConverter x:Key="NegativeStringToBoolConverter" />
   </UserControl.Resources>
-  
+
   <Border Margin="0,2,4,0" BorderBrush="#23404C" BorderThickness="1">
-    <ScrollViewer Margin="4,4,4,4" HorizontalScrollBarVisibility="Auto">
+    <Grid RowDefinitions="auto, *" ColumnDefinitions="*">
+      <TextBox Text="{Binding SearchText}"
+               Margin="5,5,5,0"
+               Grid.Row="0"/>
+      <ScrollViewer Grid.Row="1" Margin="4,4,4,4" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
       <DataGrid Name="instanceGrid" GridLinesVisibility="Vertical" Margin="0,0,3,0"
         VerticalAlignment="Top"
         HorizontalAlignment="Left"
@@ -26,7 +30,7 @@
         RowDetailsVisibilityMode="VisibleWhenSelected"
         MinWidth="720"
         VerticalGridLinesBrush="{StaticResource ThemeControlHighBrush}"
-        Items="{Binding EC2Instances}">
+        Items="{Binding Instances}">
 
         <DataGrid.Styles>
           <Style Selector="DataGridRow:selected">
@@ -44,7 +48,7 @@
             <MenuItem Header="_Reboot" Command="{Binding RebootEC2Instance}"/>
             <MenuItem Header="_Terminate" Command="{Binding TerminateEC2Instance}"/>
             <!-- Separators don't work in context menus.  Le sigh....
-            <Separator /> -->
+          <Separator /> -->
             <MenuItem Margin="5,5,5,5" Height="1" Background="LightGray" />
             <MenuItem Header="Re_fresh" Command="{Binding RefreshEC2Instances}"/>
           </ContextMenu>
@@ -55,7 +59,7 @@
             <DataGridTemplateColumn.CellTemplate>
               <DataTemplate>
                 <StackPanel>
-                  <TextBlock IsVisible="{Binding Tags[0].Value, Converter={StaticResource StringToBoolConverter}}" 
+                  <TextBlock IsVisible="{Binding Tags[0].Value, Converter={StaticResource StringToBoolConverter}}"
                              Text="{Binding Tags[0].Value}" />
                   <TextBlock IsVisible="{Binding Tags[0].Value, Converter={StaticResource NegativeStringToBoolConverter}}"
                              FontStyle="Italic" FontWeight="SemiBold" Foreground="DarkOrange" Text="No Name Specified" />
@@ -68,6 +72,7 @@
           <DataGridTextColumn Header="Type" Binding="{Binding InstanceType.Value}" />
           <DataGridTextColumn Header="Zone" Binding="{Binding Placement.AvailabilityZone}" />
           <DataGridTextColumn Header="State" Binding="{Binding State.Name.Value}"/>
+
         </DataGrid.Columns>
         <DataGrid.RowDetailsTemplate>
           <DataTemplate>
@@ -103,6 +108,7 @@
         </DataGrid.RowDetailsTemplate>
       </DataGrid>
     </ScrollViewer>
-  </Border>
+  </Grid>
+ </Border>
 
   </UserControl>

@@ -1,26 +1,55 @@
 ﻿using Amazon.EC2;
 using Amazon.EC2.Model;
 using Avalonia.Threading;
+using DynamicData;
 using MyrinaUI.Services;
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive.Linq;
 
 namespace MyrinaUI.ViewModels {
     public class DataGridViewModel : ViewModelBase {
         private DispatcherTimer _refreshTimer = new DispatcherTimer();
 
-        public ObservableCollection<Instance> EC2Instances { get; } = new ObservableCollection<Instance>();
+        private SourceList<Instance> _sourceInstances = new SourceList<Instance>();
+        //private IObservable<IChangeSet<Instance>> _filter;
 
+        private ReadOnlyObservableCollection<Instance> _instances;
+        public ReadOnlyObservableCollection<Instance> Instances {
+            get { return _instances; }
+            set { this.RaiseAndSetIfChanged(ref _instances, value); }
+        }
+
+        // Property for the selected instance, or row
         private Instance _sInstance;
         public Instance SInstance {
             get { return _sInstance; }
             set { this.RaiseAndSetIfChanged(ref _sInstance, value); }
         }
 
+        private string _searchText;
+        public string SearchText {
+            get { return _searchText; }
+            set { this.RaiseAndSetIfChanged(ref _searchText, value); }
+        }
+
         public DataGridViewModel() {
             EventSystem.Subscribe<SettingsChanged>((x) => { RefreshEC2Instances(); });
+
             this.WhenAnyValue(x => x.SInstance).Subscribe((x) => EventSystem.Publish(x));
+
+            var dynamicFilter = this.WhenAnyValue(x => x.SearchText)
+                .Where(x => x == null || (x.Length == 0 || x.Length >= 3))
+                .Throttle(TimeSpan.FromMilliseconds(250))
+                .Select(text => (Func<Instance, bool>) (i => ApplyFilter(i, text)));
+
+            _sourceInstances.Connect()
+                .Filter(dynamicFilter)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Bind(out _instances)
+                .Subscribe();
 
             RefreshEC2Instances();
 
@@ -29,20 +58,37 @@ namespace MyrinaUI.ViewModels {
             _refreshTimer.Start();
         }
 
-        public async void RefreshEC2Instances() {
+        private bool ApplyFilter(Instance i, string filter) {
+            if (string.IsNullOrWhiteSpace(filter))
+                return true;
+
+            foreach (var tag in i.Tags) {
+                if (tag.Key.StartsWith(filter)) return true;
+                if (tag.Value.StartsWith(filter)) return true;
+            }
+
+            if (i.InstanceId.StartsWith(filter)) return true;
+            if (i.InstanceType.Value.StartsWith(filter)) return true;
+            if (i.Placement.AvailabilityZone.StartsWith(filter)) return true;
+            if (i.State.Name.ToString().StartsWith(filter)) return true;
+
+            return false;
+        }
+
+        private async void RefreshEC2Instances() {
             if (string.IsNullOrWhiteSpace(Settings.Current.AccessKey) ||
                 string.IsNullOrWhiteSpace(Settings.Current.SecretKey))
                 return;
 
             Instance si = SInstance;
-            await EC2Service.Instance.GetEC2Instances(EC2Instances)
+            await EC2Service.Instance.GetEC2Instances(_sourceInstances)
                 .ContinueWith(_ => ResetSelectedInstance(si));
         }
 
         private void ResetSelectedInstance(Instance si) {
             if (si == null) return;
 
-            foreach (Instance instance in EC2Instances) {
+            foreach (Instance instance in _instances) {
                 if (instance.InstanceId == si.InstanceId)
                     SInstance = instance;
             }

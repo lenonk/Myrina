@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
@@ -25,7 +24,7 @@ namespace MyrinaUI.Views {
                     }
                 },
                 handledEventsToo: true);
-        }
+            }
 
         private void InitializeComponent() {
             AvaloniaXamlLoader.Load(this);

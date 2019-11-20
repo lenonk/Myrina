@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
+using DynamicData;
 
 namespace MyrinaUI.Services {
     public sealed class EC2Service {
@@ -45,6 +46,8 @@ namespace MyrinaUI.Services {
             AddTagsToInstance(req, Settings.Current.Tags);
             // Add instance specific tags, overwriting defaults
             AddTagsToInstance(req, tags);
+            // Add a tag to sign this as created by Myrina, and the user who did it.
+            AddSignatureTag(req);
 
             RunInstancesResponse resp;
 
@@ -214,7 +217,7 @@ namespace MyrinaUI.Services {
             return result;
         }
         
-        public async Task<int> GetEC2Instances(ObservableCollection<Instance> col) {
+        public async Task<int> GetEC2Instances(SourceList<Instance> col) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _instances = new List<Instance>();
 
@@ -348,6 +351,37 @@ namespace MyrinaUI.Services {
             return result;
         }
 
+        public async Task<int> GetEC2InstanceStatus(ObservableCollection<InstanceStatus> col, Instance instance) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            var _status = new List<InstanceStatus>();
+
+            var req = new DescribeInstanceStatusRequest();
+            req.InstanceIds.Add(instance.InstanceId);
+
+            DescribeInstanceStatusResponse resp;
+            var result = await Task.Run(async () => { 
+                try { resp = await client.DescribeInstanceStatusAsync(req); }
+                catch (AmazonEC2Exception e) {
+                    throw e;
+                }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: DescribeInstanceStatusAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
+
+                foreach (var s in resp.InstanceStatuses) {
+                    _status.Add(s);
+                }
+
+                return 0;
+            });
+
+            col.Clear();
+            _status.ForEach(x => col.Add(x));
+            return result;
+        }
+
         public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _subnets = new List<Subnet>();
@@ -438,6 +472,21 @@ namespace MyrinaUI.Services {
             });
         }
 
+        private void AddSignatureTag(RunInstancesRequest req) {
+            if (req.TagSpecifications.Count == 0) {
+                req.TagSpecifications.Add(new TagSpecification() {
+                    ResourceType = ResourceType.Instance,
+                    Tags = new List<Tag>()
+                });
+            }
+            var taglist = req.TagSpecifications[0].Tags;
+
+            taglist.Add(new Tag() {
+                Key = "signature",
+                Value = $"Myrina({Environment.UserName})"
+            });
+        }
+        
         private void AddTagsToInstance(RunInstancesRequest req, 
             ObservableCollection<Tag> tags) {
             if (tags == null) return;
@@ -452,7 +501,7 @@ namespace MyrinaUI.Services {
 
             tags.ToList().ForEach((tag) => {
                 taglist.Remove(taglist.Where((x) => x.Key == tag.Key).FirstOrDefault());
-                req.TagSpecifications[0].Tags.Add(tag);
+                taglist.Add(tag);
             });
 
         }

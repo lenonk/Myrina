@@ -105,7 +105,7 @@ namespace MyrinaUI.ViewModels {
                 .Subscribe(x => EventSystem.Publish(new TagsChanged() { value = x }));
 
             this.WhenAnyValue(x => x.AccessKey, y => y.SecretKey)
-                .Where((x) =>
+                .Where(x =>
                     !string.IsNullOrWhiteSpace(x.Item1) &&
                     !string.IsNullOrWhiteSpace(x.Item2) &&
                     x.Item1.Length >= AccessKeyLength &&

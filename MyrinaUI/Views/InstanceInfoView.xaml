@@ -273,6 +273,31 @@
         </TabItem>
 
         <TabItem Header="Status Checks">
+          <ItemsControl Grid.Row="0" Grid.Column="0" Items="{Binding $parent[UserControl].DataContext.Status}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="auto,*" RowDefinitions="auto">
+                    <ItemsControl Grid.Row="0" Grid.Column="0" Items="{Binding SystemStatus.Details}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="10,5,0,3" Text="{Binding Name.Value}" />
+                            <TextBlock FontStyle="Italic" FontWeight="SemiBold" Margin="0,5,0,3" Text=":" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ItemsControl Grid.Row="0" Grid.Column="1" Items="{Binding SystemStatus.Details}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Margin="10,5,0,3" Text="{Binding Status.Value}" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </TabItem>
 
         <TabItem Header="Tags">

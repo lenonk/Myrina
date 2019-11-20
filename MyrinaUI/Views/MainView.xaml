@@ -116,7 +116,7 @@
                 <Grid Grid.Row="4" Grid.Column="1" Grid.RowSpan="2" RowDefinitions="auto, auto" ColumnDefinitions="auto, *">
                   <!-- Number of Instances -->
                   <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Count:" />
-                  <TextBox MinWidth="40" Margin="5,0,10,10" Grid.Row="1" Grid.Column="0" Text="{Binding StartNumber}" />
+                  <TextBox MinWidth="40" Margin="5,0,5,10" Grid.Row="1" Grid.Column="0" Text="{Binding StartNumber}" />
 
                   <!-- Key Name -->
                   <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="Key Name:" />
@@ -136,7 +136,7 @@
           </TabControl>
 
           <!-- Security Groups Tab -->
-          <TabControl Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-1,-1,2">
+          <TabControl Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-4,-1,2">
             <!-- Add Security group button -->
             <TabItem Header="Security Groups:">
                 <Grid RowDefinitions="auto,*" ColumnDefinitions="3*,*">
@@ -179,7 +179,7 @@
           </TabControl>
 
           <!-- Tags Tab -->
-          <TabControl Grid.Row="2" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-1,-1,2">
+          <TabControl Grid.Row="2" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-4,-1,2">
             <!-- Add Tag button -->
             <TabItem Header="Tags:">
               <ScrollViewer HorizontalScrollBarVisibility="Disabled">
