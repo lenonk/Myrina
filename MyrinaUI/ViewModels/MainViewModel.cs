@@ -90,8 +90,9 @@ namespace MyrinaUI.ViewModels {
                 .Where(x => x != null)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe((x) => {
-                RefreshEC2Subnets(); 
-                RefreshEC2SecurityGroups(); 
+                    ActiveSecurityGroups.Clear();
+                    RefreshEC2Subnets(); 
+                    RefreshEC2SecurityGroups(); 
             });
         }
 
@@ -153,12 +154,7 @@ namespace MyrinaUI.ViewModels {
                 }
                 if (code == AmazonRefreshCode.Images || code == AmazonRefreshCode.All) {
                     // TODO: Pull these from the api
-                    //await EC2Utility.GetEC2Images(EC2Images);
-                    EC2Images.Clear();
-                    EC2Images.Add(new EC2Image { Name = "TMC CDIA Development", ImageId = "ami-4212963d" });
-                    EC2Images.Add(new EC2Image { Name = "TMC CDIA Integration", ImageId = "ami-c0e725bd" });
-                    EC2Images.Add(new EC2Image { Name = "TMC CDIA Master", ImageId = "ami-69dc1e14" });
-                    EC2Images.Add(new EC2Image { Name = "LM3 CDIA Integration", ImageId = "ami-03542d7c" });
+                    await EC2Service.Instance.GetEC2Images(EC2Images);
                     SImage = SettingsFirstOrDefault(Settings.Current.Image, EC2Images, "ImageId");
                 }
             } catch (AmazonEC2Exception e) {

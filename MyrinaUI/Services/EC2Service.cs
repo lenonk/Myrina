@@ -429,8 +429,8 @@ namespace MyrinaUI.Services {
             var _pairs = new List<KeyPairInfo>();
 
             var req = new DescribeKeyPairsRequest();
-            DescribeKeyPairsResponse resp;
 
+            DescribeKeyPairsResponse resp;
             var result = await Task.Run(async () => {
                 try { resp = await client.DescribeKeyPairsAsync(req); } 
                 catch (AmazonEC2Exception e) { throw e; }
@@ -449,6 +449,37 @@ namespace MyrinaUI.Services {
             _pairs.Sort((a, b) => string.Compare(a.KeyName, b.KeyName));
             col.Add(new KeyPairInfo() { KeyName = "(None Selected)", KeyFingerprint = "0xdeadbeef" });
             _pairs.ForEach(x => col.Add(x));
+
+            return result;
+        }
+
+         public async Task<int> GetEC2Images(ObservableCollection<Image> col) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            var _images = new List<Image>();
+
+            var req = new DescribeImagesRequest();
+            req.Filters = new List<Filter>();
+            AddImageFilter(req.Filters, "owner-id", "239734009475");
+            AddImageFilter(req.Filters, "is-public", "false");
+
+            DescribeImagesResponse resp;
+            var result = await Task.Run(async () => {
+                try { resp = await client.DescribeImagesAsync(req); }
+                catch (AmazonEC2Exception e) { throw e; }
+
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: DescribeSubnetsAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
+
+                resp.Images.ForEach((x) => _images.Add(x));
+
+                return 0;
+            });
+
+            col.Clear();
+            _images.Sort((a, b) => string.Compare(a.Name, b.Name));
+            _images.ForEach(x => col.Add(x));
 
             return result;
         }
@@ -530,9 +561,8 @@ namespace MyrinaUI.Services {
                 }
             }
         }
-        #endregion
 
-        /* private void AddFilter(List<Filter> flist, string name, string value) {
+        private void AddImageFilter(List<Filter> flist, string name, string value) {
             Filter f = new Filter();
             f.Values = new List<string>();
 
@@ -541,39 +571,6 @@ namespace MyrinaUI.Services {
 
             flist.Add(f);
         }
-
-         public async Task GetEC2Amis(ObservableCollection<Image> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
-            DescribeImagesRequest req = new DescribeImagesRequest();
-            req.ExecutableUsers = new List<string>();
-            req.ExecutableUsers.Add("self");
-
-            req.Owners = new List<string>();
-            req.Owners.Add("self");
-
-            req.Filters = new List<Filter>();
-            AddFilter(req.Filters, "state", "available");
-            AddFilter(req.Filters, "is-public", "false");
-            AddFilter(req.Filters, "owner-alias", "amazon");
-            AddFilter(req.Filters, "image-type", "machine");
-            AddFilter(req.Filters, "architecture", "x86_64");
-
-            col.Clear();
-            try {
-                DescribeImagesResponse resp = await client.DescribeImagesAsync();
-
-                if (resp.HttpStatusCode == System.Net.HttpStatusCode.OK) {
-                    resp.Images.ForEach((x) => col.Add(x));
-                    return;
-                }
-
-                MessageBox.Show($"EC2 function: DescribeSubnetsAsync() " +
-                    $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]", MainViewModel.MainWindow);
-            }
-            catch (AmazonEC2Exception e) {
-                throw e;
-            }
-        }*/
-
+        #endregion
     }
 }
