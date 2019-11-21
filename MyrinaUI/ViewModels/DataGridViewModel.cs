@@ -7,8 +7,6 @@ using MyrinaUI.Services;
 using MyrinaUI.Views;
 using ReactiveUI;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -113,7 +111,7 @@ namespace MyrinaUI.ViewModels {
                     return;
 
                 string msg;
-                var items = ViewFinder.Get<DataGridView>() .FindControl<DataGrid>("instanceGrid").SelectedItems;
+                var items = ViewFinder.Get<DataGridView>().FindControl<DataGrid>("instanceGrid").SelectedItems;
                 switch (code) {
                     case AmazonCommand.Reboot:
                         msg = await EC2Service.Instance.RebootEC2Instance(items);

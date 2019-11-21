@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using DynamicData;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace MyrinaUI.Services {
     public sealed class EC2Service {
@@ -165,26 +166,13 @@ namespace MyrinaUI.Services {
         }
 
         public async Task<int> GetEC2InstanceTypes(ObservableCollection<string> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var _types = new List<string>();
 
-            var req = new DescribeSpotPriceHistoryRequest();
-            DescribeSpotPriceHistoryResponse resp;
-
             var result = await Task.Run(async () => {
-                try { resp = await client.DescribeSpotPriceHistoryAsync(req); } 
-                catch (AmazonEC2Exception e) { throw e; }
-
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: DescribeSpotPriceHistoryAsync() " +
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                Type type = typeof(InstanceType);
+                foreach (var t in type.GetFields(BindingFlags.Public | BindingFlags.Static)) {
+                    _types.Add(t.GetValue(t.Name).ToString());
                 }
-
-                foreach (SpotPrice price in resp.SpotPriceHistory) {
-                    if (!_types.Contains(price.InstanceType))
-                        _types.Add(price.InstanceType);
-                }
-
                 return 0;
             });
 

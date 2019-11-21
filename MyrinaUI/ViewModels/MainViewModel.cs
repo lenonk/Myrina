@@ -163,7 +163,7 @@ namespace MyrinaUI.ViewModels {
             }
         }
 
-        //public void RefreshEC2AvailibilityZones() => RefreshAmazonData(AmazonRefreshCode.Zones);
+        public void RefreshEC2AvailibilityZones() => RefreshAmazonData(AmazonRefreshCode.Zones);
         public void RefreshEC2InstanceTypes() => RefreshAmazonData(AmazonRefreshCode.Types);
         public void RefreshEC2SecurityGroups() => RefreshAmazonData(AmazonRefreshCode.SecurityGroups);
         public void RefreshEC2Vpcs() => RefreshAmazonData(AmazonRefreshCode.Vpcs);
