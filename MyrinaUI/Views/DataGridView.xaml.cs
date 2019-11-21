@@ -24,8 +24,8 @@ namespace MyrinaUI.Views {
                     }
                 },
                 handledEventsToo: true);
-            }
-
+        }
+        
         private void InitializeComponent() {
             AvaloniaXamlLoader.Load(this);
         }

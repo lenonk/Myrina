@@ -27,7 +27,11 @@ namespace MyrinaUI.ViewModels {
             if (LogItems.Count > 500)
                 LogItems.RemoveAt(0);
 
-            LogItems.Add($"{DateTime.Now.ToString("HH:mm tt")}: {s}");
+            var lines = s.Split('\n');
+            foreach (var line in lines) {
+                if (!string.IsNullOrWhiteSpace(line))
+                    LogItems.Add($"{DateTime.Now.ToString("HH:mm tt")}: {line}");
+            }
         }
 
         public void CollapseListBox() => ListBoxIsOpen = false;

@@ -93,7 +93,8 @@ namespace MyrinaUI.ViewModels {
                     ActiveSecurityGroups.Clear();
                     RefreshEC2Subnets(); 
                     RefreshEC2SecurityGroups(); 
-            });
+                }
+            );
         }
 
         // Methods

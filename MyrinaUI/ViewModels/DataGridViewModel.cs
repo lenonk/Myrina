@@ -1,10 +1,14 @@
 ﻿using Amazon.EC2;
 using Amazon.EC2.Model;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using DynamicData;
 using MyrinaUI.Services;
+using MyrinaUI.Views;
 using ReactiveUI;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -14,8 +18,6 @@ namespace MyrinaUI.ViewModels {
         private DispatcherTimer _refreshTimer = new DispatcherTimer();
 
         private SourceList<Instance> _sourceInstances = new SourceList<Instance>();
-        //private IObservable<IChangeSet<Instance>> _filter;
-
         private ReadOnlyObservableCollection<Instance> _instances;
         public ReadOnlyObservableCollection<Instance> Instances {
             get { return _instances; }
@@ -111,21 +113,22 @@ namespace MyrinaUI.ViewModels {
                     return;
 
                 string msg;
+                var items = ViewFinder.Get<DataGridView>() .FindControl<DataGrid>("instanceGrid").SelectedItems;
                 switch (code) {
                     case AmazonCommand.Reboot:
-                        msg = await EC2Service.Instance.RebootEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.RebootEC2Instance(items);
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Start:
-                        msg = await EC2Service.Instance.StartEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.StartEC2Instance(items);
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Stop:
-                        msg = await EC2Service.Instance.StopEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.StopEC2Instance(items);
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Terminate:
-                        msg = await EC2Service.Instance.TerminateEC2Instance(SInstance.InstanceId);
+                        msg = await EC2Service.Instance.TerminateEC2Instance(items);
                         LogViewModel.LogView.Log(msg);
                         break;
                     default:

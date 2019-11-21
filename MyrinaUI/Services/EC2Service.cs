@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
 using DynamicData;
+using System.Diagnostics;
 
 namespace MyrinaUI.Services {
     public sealed class EC2Service {
@@ -60,23 +61,25 @@ namespace MyrinaUI.Services {
                 }
 
                 string msgs = "";
+                List<string> _ids = new List<string>();
                 foreach (Instance instance in resp.Reservation.Instances) {
-                    msgs += $"Sucessfully started instance id: {instance.InstanceId}";
+                    _ids.Add(instance.InstanceId);
                 }
 
-                return msgs;
+                return $"Sucessfully started instance id(s): {string.Join(", ", _ids)}\n";
             });
 
             return result;
         }
         
-        public async Task<string> TerminateEC2Instance(string instance) {
+        public async Task<string> TerminateEC2Instance(System.Collections.IList items) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new TerminateInstancesRequest();
 
-            TerminateInstancesResponse resp;
-            req.InstanceIds.Add(instance);
+            foreach (Instance i in items)
+                req.InstanceIds.Add(i.InstanceId);
 
+            TerminateInstancesResponse resp;
             var result = await Task.Run(async () => {
                 try { resp = await client.TerminateInstancesAsync(req); } 
                 catch (AmazonEC2Exception e) { throw e; }
@@ -85,19 +88,21 @@ namespace MyrinaUI.Services {
                     throw new AmazonEC2Exception($"EC2 function: TerminateInstancesAsync() " +
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
-                return $"Sucessfully requested termination of instance id: {instance}";
+
+                return $"Sucessfully requested termination of instance id(s): {string.Join(", ", req.InstanceIds)}";
             });
 
             return result;
         }
 
-        public async Task<string> StartEC2Instance(string instance) {
+        public async Task<string> StartEC2Instance(System.Collections.IList items) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new StartInstancesRequest();
 
-            StartInstancesResponse resp;
-            req.InstanceIds.Add(instance);
+            foreach (Instance i in items)
+                req.InstanceIds.Add(i.InstanceId);
 
+            StartInstancesResponse resp;
             var result = await Task.Run(async () => {
                 try { resp = await client.StartInstancesAsync(req); } 
                 catch (AmazonEC2Exception e) { throw e; }
@@ -107,19 +112,20 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                return $"Sucessfully requested start of instance id: {instance}";
+                return $"Sucessfully requested start of instance id(s): {req.InstanceIds.ToString()}";
             });
 
             return result;
         }
 
-        public async Task<string> StopEC2Instance(string instance) {
+        public async Task<string> StopEC2Instance(System.Collections.IList items) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new StopInstancesRequest();
 
-            StopInstancesResponse resp;
-            req.InstanceIds.Add(instance);
+            foreach (Instance i in items)
+                req.InstanceIds.Add(i.InstanceId);
 
+            StopInstancesResponse resp;
             var result = await Task.Run(async () => {
                 try { resp = await client.StopInstancesAsync(req); } 
                 catch (AmazonEC2Exception e) { throw e; }
@@ -129,19 +135,20 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                return $"Sucessfully requested stop of instance id: {instance}";
+                return $"Sucessfully requested stop of instance id(s): {req.InstanceIds.ToString()}";
             });
 
             return result;
         }
 
-        public async Task<string> RebootEC2Instance(string instance) {
+        public async Task<string> RebootEC2Instance(System.Collections.IList items) {
             var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
             var req = new RebootInstancesRequest();
 
-            req.InstanceIds.Add(instance);
-            RebootInstancesResponse resp;
+            foreach (Instance i in items)
+                req.InstanceIds.Add(i.InstanceId);
 
+            RebootInstancesResponse resp;
             var result = await Task.Run(async () => {
                 try { resp = await client.RebootInstancesAsync(req); } 
                 catch (AmazonEC2Exception e) { throw e; }
@@ -151,7 +158,7 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                return $"Sucessfully requested reboot of instance id: {instance}";
+                return $"Sucessfully requested reboot of instance id(s): {req.InstanceIds.ToString()}";
             });
 
             return result;
