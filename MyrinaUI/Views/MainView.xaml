@@ -17,19 +17,19 @@
     <vm:MainViewModel />
   </UserControl.DataContext>
 
-   <Grid ColumnDefinitions="5, auto, *, 5" RowDefinitions="*, auto, auto, 5">
+   <Grid ColumnDefinitions="5, 2*, *, 5" RowDefinitions="*, auto, 100, auto, 5">
 
     <!-- Row 0 Col 1-->
     <v:DataGridView Grid.Row="0" Grid.Column="1" />
 
     <!-- Row 1 Col 1-->
-     <!--<GridSplitter Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" />-->
+    <GridSplitter Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" />
 
     <!-- Row 2 Col 1-->
-    <v:LogView Grid.Row="1" Grid.Column="1"/>
+    <v:LogView Grid.Row="2" Grid.Column="1" />
 
     <!-- Row 3 Col 1-->
-     <v:InstanceInfoView Grid.Row="2" Grid.Column="1" />
+    <v:InstanceInfoView Grid.Row="3" Grid.Column="1" />
 
     <!-- Row 0 Col 2 -->
     <Border 

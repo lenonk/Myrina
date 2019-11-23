@@ -18,18 +18,15 @@
   </UserControl.Resources>
 
   <Border Margin="0,2,4,0" BorderBrush="#23404C" BorderThickness="1">
-    <Grid RowDefinitions="auto, *" ColumnDefinitions="*">
+    <Grid RowDefinitions="auto, *">
       <TextBox Text="{Binding SearchText}"
                Margin="5,5,5,0"
                Grid.Row="0"/>
       <ScrollViewer Grid.Row="1" Margin="4,4,4,4" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
       <DataGrid Name="instanceGrid" GridLinesVisibility="Vertical" Margin="0,0,3,0"
-        VerticalAlignment="Top"
-        HorizontalAlignment="Left"
         IsReadOnly="True"
         SelectedItem="{Binding SInstance, Mode=TwoWay}"
         RowDetailsVisibilityMode="VisibleWhenSelected"
-        MinWidth="720"
         VerticalGridLinesBrush="{StaticResource ThemeControlHighBrush}"
         Items="{Binding Instances}">
 
@@ -73,8 +70,8 @@
           <DataGridTextColumn Header="Type" Binding="{Binding InstanceType.Value}" />
           <DataGridTextColumn Header="Zone" Binding="{Binding Placement.AvailabilityZone}" />
           <DataGridTextColumn Header="State" Binding="{Binding State.Name.Value}"/>
-
         </DataGrid.Columns>
+
         <DataGrid.RowDetailsTemplate>
           <DataTemplate>
             <Grid ColumnDefinitions="auto,*,auto,*" RowDefinitions="auto, auto" >
@@ -111,5 +108,4 @@
     </ScrollViewer>
   </Grid>
  </Border>
-
   </UserControl>

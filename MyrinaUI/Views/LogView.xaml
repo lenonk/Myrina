@@ -210,14 +210,22 @@
         </Button>
 
       </Grid>
-      <ListBox Height="75" 
-               IsVisible="{Binding ListBoxIsOpen}"
-               AutoScrollToSelectedItem="True" 
-               Margin="-1,0,-1,-1" 
-               Name="LogListBox" 
-               Grid.Row="1" 
-               BorderBrush="#23404C" 
-               Items="{Binding LogItems}" />
+      <ListBox 
+             AutoScrollToSelectedItem="True"
+             IsVisible="{Binding ListBoxIsOpen}"
+             Margin="-1,0,-1,-1"
+             Name="LogListBox"
+             Grid.Row="1"
+             BorderBrush="#23404C"
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+             SelectedIndex="{Binding SIndex}"
+             Items="{Binding LogItems}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+              <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </Grid>
   </Border>
 </UserControl>

@@ -61,7 +61,6 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                string msgs = "";
                 List<string> _ids = new List<string>();
                 foreach (Instance instance in resp.Reservation.Instances) {
                     _ids.Add(instance.InstanceId);
