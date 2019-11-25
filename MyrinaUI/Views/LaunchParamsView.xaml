@@ -1,0 +1,185 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MyrinaUI.ViewModels;assembly=MyrinaUI"
+             xmlns:v="clr-namespace:MyrinaUI.Views;assembly=MyrinaUI"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="800"
+             x:Class="MyrinaUI.Views.LaunchParamsView">
+
+  <UserControl.DataContext>
+    <vm:LaunchParamsViewModel />
+  </UserControl.DataContext>
+
+  <Border Margin="0,2,0,0" BorderBrush="#23404C" BorderThickness="1">
+    <Grid RowDefinitions="auto, *, *, auto" ColumnDefinitions="*,*">
+
+      <!-- Settings Panel-->
+      <v:SettingsView Grid.Row="0" Grid.Column="0"
+                             Grid.RowSpan="4" Grid.ColumnSpan="2"
+                             Opacity="0" ZIndex="-1"
+                             Name="SettingsView">
+        <v:SettingsView.Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.5" />
+        </v:SettingsView.Transitions>
+      </v:SettingsView>
+
+      <!-- Launch Params Tab-->
+      <TabControl Grid.Row="0" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-1,-1,2">
+        <TabItem Header="Launch Parameters:">
+          <Grid RowDefinitions="auto, auto, auto, auto, auto, auto, auto" ColumnDefinitions="*, *">
+            <!-- Availability Zone -->
+            <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="Availability Zone:" />
+            <ComboBox Margin="10,0,5,10" MinWidth="100" Grid.Row="1" Grid.Column="0"
+                      Items="{Binding EC2AvailabilityZones}" SelectedItem="{Binding SAvailabilityZone, Mode=TwoWay}"/>
+
+            <!-- Instance Type -->
+            <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="Instance Type:" />
+            <ComboBox Margin="5,0,10,10" MinWidth="100" Grid.Row="1" Grid.Column="1"
+                      Items="{Binding EC2InstanceTypes}" SelectedItem="{Binding SInstanceType, Mode=TwoWay}"/>
+
+            <!-- VPC -->
+            <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Text="VPC Id:" />
+            <ComboBox Margin="10,0,5,10" MinWidth="100" Grid.Row="3" Grid.Column="0"
+                      Items="{Binding EC2Vpcs}" SelectedItem="{Binding SVpc, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Tags[0].Value}" />
+                    <TextBlock Text=" | " />
+                    <TextBlock FontStyle="Italic" FontWeight="SemiBold" Text="{Binding VpcId}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <!-- Image -->
+            <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" Text="Image:" />
+            <ComboBox Margin="5,0,10,10" MinWidth="100" Grid.Row="3" Grid.Column="1"
+                      Items="{Binding EC2Images}" SelectedItem="{Binding SImage, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text=" | " />
+                    <TextBlock FontStyle="Italic" FontWeight="SemiBold" Text="{Binding ImageId}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <!-- Subnet Id -->
+            <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" Text="Subnet Id:" />
+            <ComboBox Margin="10,0,5,10" MinWidth="100" Grid.Row="5" Grid.Column="0"
+                      Items="{Binding EC2Subnets}" SelectedItem="{Binding SSubnet, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Tags[0].Value}" />
+                    <TextBlock Text=" | " />
+                    <TextBlock FontStyle="Italic" FontWeight="SemiBold" Text="{Binding SubnetId}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <!-- Assign Public IP -->
+            <CheckBox Margin="10,0,5,10" Grid.Row="6" Content="Assign Public IP" IsChecked="{Binding UsePublicIp}" />
+
+            <Grid Grid.Row="4" Grid.Column="1" Grid.RowSpan="2" RowDefinitions="auto, auto" ColumnDefinitions="auto, *">
+              <!-- Number of Instances -->
+              <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Count:" />
+              <TextBox MinWidth="40" Margin="5,0,5,10" Grid.Row="1" Grid.Column="0" Text="{Binding StartNumber}" />
+
+              <!-- Key Name -->
+              <TextBlock Margin="5,0,0,5" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="Key Name:" />
+              <ComboBox Margin="5,0,10,10" MinWidth="100" Grid.Row="1" Grid.Column="1"
+                        Items="{Binding EC2KeyPairs}" SelectedItem="{Binding SKey, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Text="{Binding KeyName}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </Grid>
+          </Grid>
+        </TabItem>
+      </TabControl>
+
+      <!-- Security Groups Tab -->
+      <TabControl Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-4,-1,2">
+        <!-- Add Security group button -->
+        <TabItem Header="Security Groups:">
+          <Grid RowDefinitions="auto,*" ColumnDefinitions="3*,*">
+            <ComboBox Margin="10,5,5,10" MinWidth="100" Grid.Row="0" Grid.Column="0"
+                      Items="{Binding EC2SecurityGroups}" SelectedItem="{Binding SSecurityGroup, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding GroupName}" />
+                    <TextBlock Text=" | " />
+                    <TextBlock FontStyle="Italic" FontWeight="SemiBold" Text="{Binding GroupId}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button MinHeight="30" Grid.Row="0" Grid.Column="1" Margin="5,5,10,10"
+                    Content="Add Group" Command="{Binding AddSecurityGroup}" CommandParameter="{Binding SSecurityGroup}"/>
+
+            <ItemsControl Grid.Row="1" Grid.ColumnSpan="2" Items="{Binding ActiveSecurityGroups}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <!-- This needs to be a user control to be inserted programatically -->
+                  <Grid ColumnDefinitions="*, auto" >
+                    <TextBox IsEnabled="False" Margin="10,0,0,5" Grid.Column="0">
+                      <TextBox.Text>
+                        <MultiBinding StringFormat="{} {0} | {1}">
+                          <Binding Path="GroupName" />
+                          <Binding Path="GroupId" />
+                        </MultiBinding>
+                      </TextBox.Text>
+                    </TextBox>
+                    <Button Grid.Column="1" Margin="10,0,10,5" Content="Delete"
+                            Command="{Binding $parent[ItemsControl].DataContext.DeleteSecurityGroup}" CommandParameter="{Binding}"/>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Grid>
+        </TabItem>
+      </TabControl>
+
+      <!-- Tags Tab -->
+      <TabControl Grid.Row="2" Grid.ColumnSpan="2" BorderBrush="#23404C" BorderThickness="1" Margin="-1,-4,-1,2">
+        <!-- Add Tag button -->
+        <TabItem Header="Tags:">
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <Grid RowDefinitions="auto,*">
+              <Button MinHeight="30" Grid.Row="0" Margin="10,2,10,10" Content="Add Tag" Command="{Binding AddTag}" />
+              <ItemsControl Grid.Row="1" Name="TagsControl" Items="{Binding EC2Tags}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <!-- This needs to be a user control to be inserted programatically -->
+                    <Grid ColumnDefinitions="*, *, auto" >
+                      <TextBox Grid.Column="0" Margin="10,0,0,5" Text="{Binding Key}" />
+                      <TextBox Grid.Column="1" Margin="10,0,0,5" Text="{Binding Value}" />
+                      <Button Grid.Column="2" Margin="10,0,10,5" Content="Delete"
+                              Command="{Binding $parent[ItemsControl].DataContext.DeleteTag}" CommandParameter="{Binding}"/>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Grid>
+          </ScrollViewer>
+        </TabItem>
+      </TabControl>
+      <Button MinHeight="30" Margin="4,0,4,4" Grid.Row="3" Grid.Column="0"
+              Content="Launch" Command="{Binding LaunchEC2Instance}" />
+
+      <Button MinHeight="30" Margin="4,0,4,4" Grid.Row="3" Grid.Column="1"
+              Content="Settings" Command="{Binding ShowSettings}" />
+    </Grid>
+  </Border>
+</UserControl>

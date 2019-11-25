@@ -20,6 +20,12 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Views\LaunchParamsView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Views\LaunchParamsView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <AvaloniaResource Include="Assets\Amazon_EC2_36x36.png" />
     <AvaloniaResource Include="Assets\collapse.png" />
     <AvaloniaResource Include="Assets\expand.png" />
@@ -44,6 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\LaunchParamsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\DataGridView.xaml">
