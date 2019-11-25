@@ -36,17 +36,17 @@
           <Grid RowDefinitions="auto, auto, auto, auto, auto, auto" ColumnDefinitions="*, *">
             <!-- Zone -->
             <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Text="Availability Zone:" />
-            <ComboBox Margin="10,0,5,10" MinWidth="100" Grid.Row="1" Grid.Column="0"
+            <ComboBox Margin="10,0,5,10" MinHeight="27" MinWidth="100" Grid.Row="1" Grid.Column="0"
                      Items="{Binding EC2AvailabilityZones}" SelectedItem="{Binding SZone, Mode=TwoWay}"/>
 
             <!-- Instance Size -->
             <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Text="Instance Type:" />
-            <ComboBox Margin="5,0,10,10" MinWidth="100" Grid.Row="1" Grid.Column="1"
+            <ComboBox Margin="5,0,10,10" MinHeight="27" MinWidth="100" Grid.Row="1" Grid.Column="1"
                       Items="{Binding EC2InstanceTypes}" SelectedItem="{Binding SInstanceType, Mode=TwoWay}"/>
 
             <!-- VPC -->
             <TextBlock Margin="10,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Text="VPC Id:" />
-            <ComboBox Margin="10,0,5,10" MinWidth="100" Grid.Row="3" Grid.Column="0"
+            <ComboBox Margin="10,0,5,10" MinHeight="27" MinWidth="100" Grid.Row="3" Grid.Column="0"
                       Items="{Binding EC2Vpcs}" SelectedItem="{Binding SVpc, Mode=TwoWay}">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -61,7 +61,7 @@
 
             <!-- Image -->
             <TextBlock Margin="5,0,0,5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" Text="Image:" />
-            <ComboBox Margin="5,0,10,10" MinWidth="100" Grid.Row="3" Grid.Column="1"
+            <ComboBox Margin="5,0,10,10" MinHeight="27" MinWidth="100" Grid.Row="3" Grid.Column="1"
                       Items="{Binding EC2Images}" SelectedItem="{Binding SImage, Mode=TwoWay}">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -76,7 +76,7 @@
             
             <!-- Key Name -->
             <TextBlock Margin="10,0,0,5" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Text="Key Name:" />
-            <ComboBox Margin="10,0,5,10" MinWidth="100" Grid.Row="5" Grid.Column="0"
+            <ComboBox Margin="10,0,5,10" MinHeight="27" MinWidth="100" Grid.Row="5" Grid.Column="0"
                       Items="{Binding EC2KeyPairs}" SelectedItem="{Binding SKey, Mode=TwoWay}">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
