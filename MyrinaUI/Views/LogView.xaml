@@ -6,67 +6,68 @@
              mc:Ignorable="d" d:DesignWidth="765" d:DesignHeight="100" Name="LogView"
              x:Class="MyrinaUI.Views.LogView">
 
-  <UserControl.DataContext>
-    <vm:LogViewModel />
-  </UserControl.DataContext>
+    <UserControl.DataContext>
+        <vm:LogViewModel />
+    </UserControl.DataContext>
 
-  <Border Margin="0,4,4,0" BorderBrush="#23404C" BorderThickness="1">
-    <Grid RowDefinitions="auto,*">
-      <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" >
-        <TextBlock VerticalAlignment="Center" 
-                   Grid.Column="0" 
-                   Margin="2,0,5,3" 
-                   FontSize="11" 
-                   Text="Activity Log:" />
+    <Border Margin="0,4,4,0" BorderBrush="{DynamicResource ThemeAccentBrush4}" BorderThickness="1">
+        <Grid RowDefinitions="auto,*">
+            <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto">
+                <TextBlock VerticalAlignment="Center"
+                           Grid.Column="0"
+                           Margin="2,0,5,3"
+                           FontSize="11"
+                           Text="Activity Log:" />
 
-        <Rectangle Height="5" Grid.Column="1" >
-          <Rectangle.Fill>
-            <ImageBrush Source="/Assets/bar_texture.png"
-                        TileMode="Tile"
-                        DestinationRect="0,0,4,5"/>
-          </Rectangle.Fill>
-        </Rectangle>
+                <Rectangle Height="5" Grid.Column="1">
+                    <Rectangle.Fill>
+                        <ImageBrush Source="/Assets/bar_texture.png"
+                                    TileMode="Tile"
+                                    DestinationRect="0,0,4,5" />
+                    </Rectangle.Fill>
+                </Rectangle>
 
-        <Button VerticalContentAlignment="Center"
-                Name="CollapseButton"
-                Height="13" 
-                Width="13"
-                Margin="5,5,5,5" 
-                Background="{StaticResource ThemeControlLowBrush}"
-                IsVisible="{Binding ListBoxIsOpen}"
-                Command="{Binding CollapseListBox}"
-                Grid.Column="2">
-          <Image Margin="-9,-7,-10,-10" VerticalAlignment="Center" Source="/Assets/collapse.png" />
-        </Button>
-        <Button VerticalContentAlignment="Center"
-                Name="ExpandButton"
-                Height="13" 
-                Width="13"
-                Margin="5,5,5,5" 
-                Background="{StaticResource ThemeControlLowBrush}"
-                IsVisible="{Binding !ListBoxIsOpen}"
-                Command="{Binding ExpandListBox}"
-                Grid.Column="2">
-          <Image Margin="-9,-7,-10,-10" VerticalAlignment="Center" Source="/Assets/expand.png" />
-        </Button>
-
-      </Grid>
-      <ListBox 
-             AutoScrollToSelectedItem="True"
-             IsVisible="{Binding ListBoxIsOpen}"
-             Margin="-1,0,-1,-1"
-             Name="LogListBox"
-             Grid.Row="1"
-             BorderBrush="#23404C"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-             SelectedIndex="{Binding SIndex}"
-             Items="{Binding LogItems}">
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-              <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
-    </Grid>
-  </Border>
+                <Button Classes="Round"
+                        VerticalContentAlignment="Center"
+                        Name="CollapseButton"
+                        Height="13"
+                        Width="13"
+                        Margin="5,5,5,5"
+                        Background="{DynamicResource ThemeBackgroundBrush}"
+                        IsVisible="{Binding ListBoxIsOpen}"
+                        Command="{Binding CollapseListBox}"
+                        Grid.Column="2">
+                    <Image Margin="-9,-7,-10,-10" VerticalAlignment="Center" Source="/Assets/collapse.png" />
+                </Button>
+                <Button Classes="Round"
+                        VerticalContentAlignment="Center"
+                        Name="ExpandButton"
+                        Height="13"
+                        Width="13"
+                        Margin="5,5,5,5"
+                        Background="{DynamicResource ThemeBackgroundBrush}"
+                        IsVisible="{Binding !ListBoxIsOpen}"
+                        Command="{Binding ExpandListBox}"
+                        Grid.Column="2">
+                    <Image Margin="-9,-7,-10,-10" VerticalAlignment="Center" Source="/Assets/expand.png" />
+                </Button>
+            </Grid>
+            <ListBox AutoScrollToSelectedItem="True"
+                   Background="{DynamicResource ThemeControlHighBrush}"
+                   IsVisible="{Binding ListBoxIsOpen}"
+                   Margin="-1,0,-1,-1"
+                   Name="LogListBox"
+                   Grid.Row="1"
+                   BorderBrush="{DynamicResource ThemeAccentBrush4}"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                   SelectedIndex="{Binding SIndex}"
+                   Items="{Binding LogItems}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Border>
 </UserControl>

@@ -3,13 +3,15 @@
              xmlns:local="clr-namespace:MyrinaUI"
              x:Class="MyrinaUI.App">
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <local:ViewLocator />
     </Application.DataTemplates>
 
     <Application.Styles>
-        <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/>
-        <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseDark.xaml"/>
-        <StyleInclude Source="resm:Avalonia.Controls.DataGrid.Themes.Default.xaml?assembly=Avalonia.Controls.DataGrid"/>
+        <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml" />
+        <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseDark.xaml" />
+        <StyleInclude Source="avares://MyrinaUI/Themes/MyrinaDark.xaml" />
+        <StyleInclude Source="avares://MyrinaUI/Themes/DataGrid.xaml" />
+        <StyleInclude Source="avares://MyrinaUI/Themes/TabItem.xaml" />
+        <StyleInclude Source="avares://MyrinaUI/Themes/RoundButton.xaml" />
     </Application.Styles>
-
 </Application>

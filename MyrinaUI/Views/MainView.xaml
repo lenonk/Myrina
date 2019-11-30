@@ -7,24 +7,24 @@
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="850"
              x:Class="MyrinaUI.Views.MainView">
 
-  <UserControl.DataContext>
-    <vm:MainViewModel />
-  </UserControl.DataContext>
+    <UserControl.DataContext>
+        <vm:MainViewModel />
+    </UserControl.DataContext>
 
-  <Grid ColumnDefinitions="5, 2*, *, 5" RowDefinitions="*, auto, 100, auto, 5">
-    <!-- Row 0 Col 1-->
-    <v:DataGridView Grid.Row="0" Grid.Column="1" />
+    <Grid ColumnDefinitions="5, 2*, *, 5" RowDefinitions="*, auto, 100, auto, 5">
+        <!-- Row 0 Col 1-->
+        <v:DataGridView Grid.Row="0" Grid.Column="1" />
 
-    <!-- Row 1 Col 1-->
-    <GridSplitter Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" />
+        <!-- Row 1 Col 1-->
+        <GridSplitter Background="{DynamicResource ThemeBackgroundBrush}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" />
 
-    <!-- Row 2 Col 1-->
-    <v:LogView Grid.Row="2" Grid.Column="1" />
+        <!-- Row 2 Col 1-->
+        <v:LogView Grid.Row="2" Grid.Column="1" />
 
-    <!-- Row 3 Col 1-->
-    <v:InstanceInfoView Grid.Row="3" Grid.Column="1" />
+        <!-- Row 3 Col 1-->
+        <v:InstanceInfoView Grid.Row="3" Grid.Column="1" />
 
-    <!-- Row 0 Col 2 -->
-    <v:LaunchParamsView Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" />
-  </Grid>
+        <!-- Row 0 Col 2 -->
+        <v:LaunchParamsView Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" />
+    </Grid>
 </UserControl>
