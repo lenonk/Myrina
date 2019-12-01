@@ -46,8 +46,8 @@
                         <MenuItem Header="_Reboot" Command="{Binding RebootEC2Instance}" />
                         <MenuItem Header="_Terminate" Command="{Binding TerminateEC2Instance}" />
                         <!-- Separators don't work in context menus.  Le sigh....
-          <Separator /> -->
-                        <MenuItem Margin="5,5,5,5" Height="1" Background="LightGray" />
+                        <Separator /> -->
+                        <MenuItem Header="-" />
                         <MenuItem Header="Re_fresh" Command="{Binding RefreshEC2Instances}" />
                     </ContextMenu>
                 </DataGrid.ContextMenu>

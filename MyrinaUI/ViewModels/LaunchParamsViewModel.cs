@@ -107,8 +107,13 @@ namespace MyrinaUI.ViewModels {
                 var msg = await EC2Service.Instance.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                     SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
                     StartNumber, SVpc, SKey, EC2Tags);
+                    EventSystem.Publish(new RefreshInstanceList());
                     LogViewModel.LogView.Log(msg);
-            } catch (AmazonEC2Exception e) {
+            } 
+            catch (Exception e) when 
+                (e is AmazonEC2Exception ||
+                 e is System.Net.Http.HttpRequestException ||
+                 e is System.NullReferenceException) {
                 LogViewModel.LogView.Log(e.Message);
             }
         }
@@ -156,7 +161,10 @@ namespace MyrinaUI.ViewModels {
                     await EC2Service.Instance.GetEC2Images(EC2Images);
                     SImage = SettingsFirstOrDefault(Settings.Current.Image, EC2Images, "ImageId");
                 }
-            } catch (AmazonEC2Exception e) {
+            } 
+            catch (Exception e) when 
+                (e is AmazonEC2Exception ||
+                 e is System.Net.Http.HttpRequestException) {
                 LogViewModel.LogView.Log(e.Message);
             }
         }
@@ -172,7 +180,7 @@ namespace MyrinaUI.ViewModels {
 
         // Private helpers
         private T SettingsFirstOrDefault<T>(string value, ObservableCollection<T> col, string property = null) {
-            if (value != null && value != string.Empty) {
+            if (!string.IsNullOrEmpty(value)) {
                 foreach (T x in col) {
                     if (x as string == value) 
                         return x;
@@ -188,7 +196,7 @@ namespace MyrinaUI.ViewModels {
             if (col != null && col.Count > 0)
                 return col[0];
 
-            return default(T);
+            return default;
         }
     }
 }

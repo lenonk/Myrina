@@ -50,8 +50,8 @@
         <sys:Double x:Key="ThemeDisabledOpacity">0.5</sys:Double>
 
         <sys:Double x:Key="FontSizeSmall">10</sys:Double>
-        <sys:Double x:Key="FontSizeNormal">12</sys:Double>
-        <sys:Double x:Key="FontSizeLarge">16</sys:Double>
+        <sys:Double x:Key="FontSizeNormal">13</sys:Double>
+        <sys:Double x:Key="FontSizeLarge">14</sys:Double>
 
         <sys:Double x:Key="ScrollBarThickness">16</sys:Double>
     </Style.Resources>

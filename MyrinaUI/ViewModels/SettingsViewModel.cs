@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using ReactiveUI;
-using MyrinaUI.Views;
+﻿using Amazon.EC2;
 using Amazon.EC2.Model;
 using MyrinaUI.Services;
-using Amazon.EC2;
-using System.Reflection;
+using MyrinaUI.Views;
+using ReactiveUI;
+using System;
+using System.Collections.ObjectModel;
 using System.Reactive.Linq;
-using System.Diagnostics;
-using System.Reactive;
+using System.Reflection;
 
 namespace MyrinaUI.ViewModels {
+
     public class SettingsViewModel : ViewModelBase {
         public ObservableCollection<string> EC2AvailabilityZones { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> EC2InstanceTypes { get; } = new ObservableCollection<string>();
@@ -20,54 +19,64 @@ namespace MyrinaUI.ViewModels {
         public ObservableCollection<Tag> EC2Tags { get; } = new ObservableCollection<Tag>();
 
         #region Properties
+
         private string _accessKey = Settings.Current.AccessKey;
+
         public string AccessKey {
             get { return _accessKey; }
             set { this.RaiseAndSetIfChanged(ref _accessKey, value); }
         }
 
         private string _secretKey = Settings.Current.SecretKey;
+
         public string SecretKey {
             get { return _secretKey; }
             set { this.RaiseAndSetIfChanged(ref _secretKey, value); }
         }
 
-        private string _sZone = Settings.Current.Zone; 
+        private string _sZone = Settings.Current.Zone;
+
         public string SZone {
             get { return _sZone; }
             set { this.RaiseAndSetIfChanged(ref _sZone, value); }
         }
 
         private string _sInstanceType = Settings.Current.InstanceType;
+
         public string SInstanceType {
             get { return _sInstanceType; }
             set { this.RaiseAndSetIfChanged(ref _sInstanceType, value); }
         }
 
         private Image _sImage;
+
         public Image SImage {
             get { return _sImage; }
             set { this.RaiseAndSetIfChanged(ref _sImage, value); }
         }
 
         private Vpc _sVpc;
+
         public Vpc SVpc {
             get { return _sVpc; }
             set { this.RaiseAndSetIfChanged(ref _sVpc, value); }
         }
 
         private KeyPairInfo _sKey;
+
         public KeyPairInfo SKey {
             get { return _sKey; }
             set { this.RaiseAndSetIfChanged(ref _sKey, value); }
         }
 
         private ObservableCollection<Tag> _tags = Settings.Current.Tags;
+
         public ObservableCollection<Tag> Tags {
             get { return _tags; }
             set { this.RaiseAndSetIfChanged(ref _tags, value); }
         }
-        #endregion
+
+        #endregion Properties
 
         public SettingsViewModel() {
             const int AccessKeyLength = 20;
@@ -88,18 +97,23 @@ namespace MyrinaUI.ViewModels {
             this.WhenAnyValue(x => x.SZone).Skip(1)
                 .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new ZoneChanged() { value = x }));
+
             this.WhenAnyValue(x => x.SInstanceType).Skip(1)
                 .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new InstanceTypeChanged() { value = x }));
+
             this.WhenAnyValue(x => x.SImage).Skip(1)
                 .Where(x => x != null)
-                .Subscribe(x => EventSystem.Publish(new ImageChanged() { value = x.ImageId}));
+                .Subscribe(x => EventSystem.Publish(new ImageChanged() { value = x.ImageId }));
+
             this.WhenAnyValue(x => x.SVpc).Skip(1)
                 .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new VpcChanged() { value = x.VpcId }));
+
             this.WhenAnyValue(x => x.SKey).Skip(1)
                 .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new KeyPairChanged() { value = x.KeyName }));
+
             this.WhenAnyValue(x => x.Tags).Skip(1)
                 .Where(x => x != null)
                 .Subscribe(x => EventSystem.Publish(new TagsChanged() { value = x }));
@@ -116,7 +130,7 @@ namespace MyrinaUI.ViewModels {
         }
 
         public void AddTag() => Tags.Add(new Tag() { Key = "", Value = "" });
-        public void DeleteTag(Tag key) =>  Tags.Remove(key);
+        public void DeleteTag(Tag key) => Tags.Remove(key);
 
         public void Hide() {
             var sv = ViewFinder.Get<SettingsView>();
@@ -160,7 +174,9 @@ namespace MyrinaUI.ViewModels {
                     SImage = SettingsFirstOrDefault(Settings.Current.Image, EC2Images, "ImageId");
                 }
             }
-            catch (AmazonEC2Exception e) {
+            catch (Exception e) when
+                (e is AmazonEC2Exception ||
+                 e is System.Net.Http.HttpRequestException) {
                 LogViewModel.LogView.Log(e.Message);
             }
         }
@@ -174,7 +190,7 @@ namespace MyrinaUI.ViewModels {
 
         // Private helpers
         private T SettingsFirstOrDefault<T>(string value, ObservableCollection<T> col, string property = null) {
-            if (value != null && value != string.Empty) {
+            if (!string.IsNullOrEmpty(value)) {
                 foreach (T x in col) {
                     if (x as string == value)
                         return x;
@@ -190,7 +206,7 @@ namespace MyrinaUI.ViewModels {
             if (col != null && col.Count > 0)
                 return col[0];
 
-            return default(T);
+            return default;
         }
     }
 }

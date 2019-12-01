@@ -37,6 +37,7 @@ namespace MyrinaUI.ViewModels {
 
         public DataGridViewModel() {
             EventSystem.Subscribe<SettingsChanged>((x) => { RefreshEC2Instances(); });
+            EventSystem.Subscribe<RefreshInstanceList>(_ => { RefreshEC2Instances(); });
 
             this.WhenAnyValue(x => x.SInstance).Subscribe((x) => EventSystem.Publish(x));
 
@@ -115,18 +116,22 @@ namespace MyrinaUI.ViewModels {
                 switch (code) {
                     case AmazonCommand.Reboot:
                         msg = await EC2Service.Instance.RebootEC2Instance(items);
+                        RefreshEC2Instances();
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Start:
                         msg = await EC2Service.Instance.StartEC2Instance(items);
+                        RefreshEC2Instances();
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Stop:
                         msg = await EC2Service.Instance.StopEC2Instance(items);
+                        RefreshEC2Instances();
                         LogViewModel.LogView.Log(msg);
                         break;
                     case AmazonCommand.Terminate:
                         msg = await EC2Service.Instance.TerminateEC2Instance(items);
+                        RefreshEC2Instances();
                         LogViewModel.LogView.Log(msg);
                         break;
                     default:

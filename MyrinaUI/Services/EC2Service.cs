@@ -112,7 +112,7 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                return $"Sucessfully requested start of instance id(s): {req.InstanceIds.ToString()}";
+                return $"Sucessfully requested start of instance id(s): {string.Join(", ", req.InstanceIds)}";
             });
 
             return result;
@@ -135,7 +135,7 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                return $"Sucessfully requested stop of instance id(s): {req.InstanceIds.ToString()}";
+                return $"Sucessfully requested stop of instance id(s): {string.Join(", ", req.InstanceIds)}";
             });
 
             return result;
@@ -158,7 +158,7 @@ namespace MyrinaUI.Services {
                         $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
                 }
 
-                return $"Sucessfully requested reboot of instance id(s): {req.InstanceIds.ToString()}";
+                return $"Sucessfully requested reboot of instance id(s): {string.Join(", ", req.InstanceIds)}";
             });
 
             return result;

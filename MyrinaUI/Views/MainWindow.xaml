@@ -5,7 +5,7 @@
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="850"
         x:Class="MyrinaUI.Views.MainWindow"
         Icon="/Assets/Amazon_EC2_36x36.ico" Name="mainWindow"
-        WindowStartupLocation="CenterScreen" FontSize="13"
+        WindowStartupLocation="CenterScreen" FontSize="{DynamicResource FontSizeNormal}"
         Title="Myrina" Height="850" Width="1200" MinWidth="1200"
         Background="{DynamicResource ThemeBackgroundBrush}"
         TextBlock.Foreground="{DynamicResource ThemeControlHighColor}"

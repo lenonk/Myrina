@@ -10,5 +10,6 @@ namespace MyrinaUI.Services {
     public class VpcChanged {  public string value { get; set; } }
     public class TagsChanged {  public ObservableCollection<Tag> value { get; set; } }
     public class KeyPairChanged {  public string value { get; set; } }
+    public class RefreshInstanceList { };
     public class SettingsChanged { }
 }

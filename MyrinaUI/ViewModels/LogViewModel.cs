@@ -41,7 +41,7 @@ namespace MyrinaUI.ViewModels {
             var lines = s.Split('\n');
             foreach (var line in lines) {
                 if (!string.IsNullOrWhiteSpace(line)) {
-                    LogItems.Add($"{DateTime.Now.ToString("HH:mm tt")}: {line}");
+                    LogItems.Add($"{DateTime.Now.ToString("HH:mm:ss tt")}: {line}");
                     SIndex = LogItems.Count - 1;
                 }
             }
