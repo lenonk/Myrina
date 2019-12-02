@@ -9,6 +9,7 @@
     <ApplicationIcon />
     <StartupObject>MyrinaUI.Program</StartupObject>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <AssemblyName>Myrina</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
