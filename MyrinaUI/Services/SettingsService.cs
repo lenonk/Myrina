@@ -2,18 +2,19 @@
 using MyrinaUI.ViewModels;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
 namespace MyrinaUI.Services {
+
     public sealed class Settings {
+
         private string configFile = Path.Combine(Environment.GetFolderPath(
-            Environment.SpecialFolder.LocalApplicationData), 
-            "Myrina", 
+            Environment.SpecialFolder.LocalApplicationData),
+            "Myrina",
             "Myrina.cfg");
 
-        private static readonly Lazy<Settings> lazy = 
+        private static readonly Lazy<Settings> lazy =
             new Lazy<Settings>(() => new Settings());
 
         public static Settings Current { get { return lazy.Value; } }
@@ -49,32 +50,39 @@ namespace MyrinaUI.Services {
             get { return _settings.AccessKey; }
             private set { _settings.AccessKey = value; }
         }
+
         public string SecretKey {
-            get { return _settings.SecretKey; } 
+            get { return _settings.SecretKey; }
             private set { _settings.SecretKey = value; }
         }
-        public string Zone { 
+
+        public string Zone {
             get { return _settings.Zone; }
             private set { _settings.Zone = value; }
         }
-        public string InstanceType { 
+
+        public string InstanceType {
             get { return _settings.InstanceType; }
             private set { _settings.InstanceType = value; }
         }
+
         public string Image {
-            get { return _settings.Image; } 
+            get { return _settings.Image; }
             private set { _settings.Image = value; }
         }
-        public string Vpc { 
+
+        public string Vpc {
             get { return _settings.Vpc; }
             private set { _settings.Vpc = value; }
         }
-        public string KeyPair { 
+
+        public string KeyPair {
             get { return _settings.KeyPair; }
             private set { _settings.KeyPair = value; }
         }
+
         public ObservableCollection<Tag> Tags {
-            get { return _settings.Tags; } 
+            get { return _settings.Tags; }
             private set { _settings.Tags = value; }
         }
 
@@ -100,7 +108,7 @@ namespace MyrinaUI.Services {
                 }
             }
             catch (JsonException e) {
-                Debug.WriteLine(e.Message);
+                LogViewModel.LogView.Log(e.Message);
             }
         }
     }

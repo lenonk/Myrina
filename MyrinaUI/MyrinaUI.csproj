@@ -30,12 +30,12 @@
     <AvaloniaResource Include="Assets\bar_texture.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.9.0-preview9" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.0-preview9" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.9.0-preview9" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0-preview9" />
-    <PackageReference Include="AWSSDK.Core" Version="3.3.103.70" />
-    <PackageReference Include="AWSSDK.EC2" Version="3.3.140.1" />
+    <PackageReference Include="Avalonia" Version="0.9.0-rc.1" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.0-rc.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.9.0-rc.1" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0-rc.1" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.104" />
+    <PackageReference Include="AWSSDK.EC2" Version="3.3.142" />
     <PackageReference Include="Prism.Core" Version="7.2.0.1422" />
   </ItemGroup>
   <ItemGroup>
