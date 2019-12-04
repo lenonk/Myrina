@@ -8,7 +8,10 @@ using System.Text.Json;
 
 namespace MyrinaUI.Services {
     public sealed class Settings {
-        private string configFile = "Myrina.cfg";
+        private string configFile = Path.Combine(Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData), 
+            "Myrina", 
+            "Myrina.cfg");
 
         private static readonly Lazy<Settings> lazy = 
             new Lazy<Settings>(() => new Settings());
@@ -76,9 +79,15 @@ namespace MyrinaUI.Services {
         }
 
         public void Save() {
-            using (StreamWriter sw = new StreamWriter(configFile)) {
-                string s = JsonSerializer.Serialize(_settings, typeof(SettingsProperties));
-                sw.Write(s);
+            Directory.CreateDirectory(Path.GetDirectoryName(configFile));
+            try {
+                using (StreamWriter sw = new StreamWriter(configFile)) {
+                    string s = JsonSerializer.Serialize(_settings, typeof(SettingsProperties));
+                    sw.Write(s);
+                }
+            }
+            catch (UnauthorizedAccessException e) {
+                LogViewModel.LogView.Log(e.Message);
             }
 
             EventSystem.Publish(new SettingsChanged());
