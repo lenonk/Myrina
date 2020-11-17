@@ -313,14 +313,15 @@ namespace MyrinaUI.Services {
         }
 
         public async Task<int> GetEC2AvailabilityZones(ObservableCollection<string> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            var client1 = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            var client2 = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast2);
             var _zones = new List<string>();
 
             var req = new DescribeAvailabilityZonesRequest();
             DescribeAvailabilityZonesResponse resp;
 
             var result = await Task.Run(async () => { 
-                try { resp = await client.DescribeAvailabilityZonesAsync(req); }
+                try { resp = await client1.DescribeAvailabilityZonesAsync(req); }
                 catch (AmazonEC2Exception e) {
                     throw e;
                 }
@@ -334,7 +335,22 @@ namespace MyrinaUI.Services {
                     if (!_zones.Contains(zone.ZoneName) && zone.State.ToString() == "available")
                         _zones.Add(zone.ZoneName);
                 }
+                
+                try { resp = await client2.DescribeAvailabilityZonesAsync(req); }
+                catch (AmazonEC2Exception e) {
+                    throw e;
+                }
 
+                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                    throw new AmazonEC2Exception($"EC2 function: DescribeAvailabilityZonesAsync() " +
+                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                }
+
+                foreach (AvailabilityZone zone in resp.AvailabilityZones) {
+                    if (!_zones.Contains(zone.ZoneName) && zone.State.ToString() == "available")
+                        _zones.Add(zone.ZoneName);
+                }
+                
                 return 0;
             });
 
