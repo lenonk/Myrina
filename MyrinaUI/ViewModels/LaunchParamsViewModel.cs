@@ -119,7 +119,7 @@ namespace MyrinaUI.ViewModels {
             try {
                 var msg = await EC2Service.Instance.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                     SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
-                    StartNumber, SVpc, SKey, EC2Tags);
+                    StartNumber, SVpc, SKey, EC2Tags, SAvailabilityZone);
                     EventSystem.Publish(new RefreshInstanceList() { value = SAvailabilityZone });
                     LogViewModel.LogView.Log(msg);
             } 

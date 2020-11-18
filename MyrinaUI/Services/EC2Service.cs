@@ -40,11 +40,11 @@ namespace MyrinaUI.Services {
             ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, 
             KeyPairInfo key, ObservableCollection<Tag> tags = null, string zone = "us-east-1") {
 
-            zone = NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
+            var epzone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(epzone));
             RunInstancesRequest req = new RunInstancesRequest();
             req.Placement = new Placement();
-            req.Placement.AvailabilityZone = SAvailabilityZone;
+            req.Placement.AvailabilityZone = zone;
             req.InstanceType = SInstanceType;
             req.ImageId = SAmi;
             req.MinCount = 1;
@@ -53,6 +53,10 @@ namespace MyrinaUI.Services {
                 req.KeyName = key.KeyName;
 
             SetSubnetAndSecurityGroups(req, SSubnet, sgroups, UsePublicIp);
+
+            if (!tags.ToList().Exists(x => string.Equals(x.Key, "Name", StringComparison.OrdinalIgnoreCase))
+                && !Settings.Current.Tags.ToList().Exists(x => string.Equals(x.Key, "Name", StringComparison.OrdinalIgnoreCase)))
+                return $"Instances must contain a \"Name\" tag";
 
             // Add default tags
             AddTagsToInstance(req, Settings.Current.Tags);
@@ -82,97 +86,118 @@ namespace MyrinaUI.Services {
             return result;
         }
         
-        public async Task<string> TerminateEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
-            zone = NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
-            var req = new TerminateInstancesRequest();
+        public async Task<string> TerminateEC2Instance(System.Collections.IList items) {
 
-            foreach (Instance i in items)
-                req.InstanceIds.Add(i.InstanceId);
 
-            TerminateInstancesResponse resp;
             var result = await Task.Run(async () => {
-                try { resp = await client.TerminateInstancesAsync(req); } 
-                catch (AmazonEC2Exception e) { throw e; }
+                List<string> success_ids = new List<string>();
+                foreach (Instance i in items) {
+                    var client = new AmazonEC2Client(AccessKey, SecretKey, GetEndpoint(i.Placement.AvailabilityZone));
+                    var req = new TerminateInstancesRequest();
+                    TerminateInstancesResponse resp;
 
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: TerminateInstancesAsync() " +
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    req.InstanceIds.Add(i.InstanceId);
+
+                    try { resp = await client.TerminateInstancesAsync(req); }
+                    catch (AmazonEC2Exception e) { throw e; }
+
+                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                        throw new AmazonEC2Exception($"EC2 function: TerminateInstancesAsync() " +
+                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    }
+                    else {
+                        success_ids.Add(i.InstanceId);
+                    }
                 }
 
-                return $"Sucessfully requested termination of instance id(s): {string.Join(", ", req.InstanceIds)}";
+                return $"Sucessfully requested termination of instance id(s): {string.Join(", ", success_ids)}";
             });
 
             return result;
         }
 
-        public async Task<string> StartEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
-            zone = NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
-            var req = new StartInstancesRequest();
+        public async Task<string> StartEC2Instance(System.Collections.IList items) {
+            List<string> success_ids = new List<string>();
 
-            foreach (Instance i in items)
-                req.InstanceIds.Add(i.InstanceId);
-
-            StartInstancesResponse resp;
             var result = await Task.Run(async () => {
-                try { resp = await client.StartInstancesAsync(req); } 
-                catch (AmazonEC2Exception e) { throw e; }
+                foreach (Instance i in items) {
+                    var client = new AmazonEC2Client(AccessKey, SecretKey, GetEndpoint(i.Placement.AvailabilityZone));
+                    var req = new StartInstancesRequest();
+                    StartInstancesResponse resp;
 
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: StartInstancesAsync() " +
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    req.InstanceIds.Add(i.InstanceId);
+
+                    try { resp = await client.StartInstancesAsync(req); }
+                    catch (AmazonEC2Exception e) { throw e; }
+
+                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                        throw new AmazonEC2Exception($"EC2 function: StartInstancesAsync() " +
+                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    }
+                    else {
+                        success_ids.Add(i.InstanceId);
+                    }
                 }
 
-                return $"Sucessfully requested start of instance id(s): {string.Join(", ", req.InstanceIds)}";
+                return $"Sucessfully requested start of instance id(s): {string.Join(", ", success_ids)}";
             });
 
             return result;
         }
 
-        public async Task<string> StopEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
-            zone = NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
-            var req = new StopInstancesRequest();
+        public async Task<string> StopEC2Instance(System.Collections.IList items) {
+            List<string> success_ids = new List<string>();
 
-            foreach (Instance i in items)
-                req.InstanceIds.Add(i.InstanceId);
-
-            StopInstancesResponse resp;
             var result = await Task.Run(async () => {
-                try { resp = await client.StopInstancesAsync(req); } 
-                catch (AmazonEC2Exception e) { throw e; }
+                foreach (Instance i in items) {
+                    var client = new AmazonEC2Client(AccessKey, SecretKey, GetEndpoint(i.Placement.AvailabilityZone));
+                    var req = new StopInstancesRequest();
+                    StopInstancesResponse resp;
 
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: StopInstancesAsync() " + 
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    req.InstanceIds.Add(i.InstanceId);
+
+                    try { resp = await client.StopInstancesAsync(req); }
+                    catch (AmazonEC2Exception e) { throw e; }
+
+                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                        throw new AmazonEC2Exception($"EC2 function: StopInstancesAsync() " +
+                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    }
+                    else {
+                        success_ids.Add(i.InstanceId);
+                    }
                 }
 
-                return $"Sucessfully requested stop of instance id(s): {string.Join(", ", req.InstanceIds)}";
+                return $"Sucessfully requested stop of instance id(s): {string.Join(", ", success_ids)}";
             });
 
             return result;
         }
 
-        public async Task<string> RebootEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
-            zone = NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
-            var req = new RebootInstancesRequest();
+        public async Task<string> RebootEC2Instance(System.Collections.IList items) {
+            List<string> success_ids = new List<string>();
 
-            foreach (Instance i in items)
-                req.InstanceIds.Add(i.InstanceId);
-
-            RebootInstancesResponse resp;
             var result = await Task.Run(async () => {
-                try { resp = await client.RebootInstancesAsync(req); } 
-                catch (AmazonEC2Exception e) { throw e; }
+                foreach (Instance i in items) {
+                    var client = new AmazonEC2Client(AccessKey, SecretKey, GetEndpoint(i.Placement.AvailabilityZone));
+                    var req = new RebootInstancesRequest();
+                    RebootInstancesResponse resp;
 
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: RebootInstancesAsync() " +
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    req.InstanceIds.Add(i.InstanceId);
+
+                    try { resp = await client.RebootInstancesAsync(req); }
+                    catch (AmazonEC2Exception e) { throw e; }
+
+                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                        throw new AmazonEC2Exception($"EC2 function: RebootInstancesAsync() " +
+                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    }
+                    else {
+                        success_ids.Add(i.InstanceId);
+                    }
                 }
 
-                return $"Sucessfully requested reboot of instance id(s): {string.Join(", ", req.InstanceIds)}";
+                return $"Sucessfully requested reboot of instance id(s): {string.Join(", ", success_ids)}";
             });
 
             return result;
@@ -196,9 +221,8 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2InstanceTags(Instance instance, string zone = "us-east-1") {
-            NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
+        public async Task<int> GetEC2InstanceTags(Instance instance) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, GetEndpoint(instance.Placement.AvailabilityZone));
             var _tags = new List<Tag>();
 
             var req = new DescribeTagsRequest();
@@ -368,20 +392,21 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2InstanceStatus(ObservableCollection<InstanceStatus> col, Instance instance, string zone = "us-east-1") {
-            zone = NormalizeZoneToEndpoint(zone);
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
+        public async Task<int> GetEC2InstanceStatus(ObservableCollection<InstanceStatus> col, Instance instance) {
+            var client = new AmazonEC2Client(AccessKey, SecretKey, GetEndpoint(instance.Placement.AvailabilityZone));
             var _status = new List<InstanceStatus>();
 
             var req = new DescribeInstanceStatusRequest();
             req.InstanceIds.Add(instance.InstanceId);
 
             DescribeInstanceStatusResponse resp;
-            var result = await Task.Run(async () => { 
+            var result = await Task.Run(async () => {
                 try { resp = await client.DescribeInstanceStatusAsync(req); }
-                catch (AmazonEC2Exception e) {
+                catch (AmazonEC2Exception e)
+                {
                     throw e;
                 }
+                catch (System.Net.Http.HttpRequestException) { return 0; }
 
                 if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
                     throw new AmazonEC2Exception($"EC2 function: DescribeInstanceStatusAsync() " +
@@ -552,7 +577,7 @@ namespace MyrinaUI.Services {
             var taglist = req.TagSpecifications[0].Tags;
 
             tags.ToList().ForEach((tag) => {
-                taglist.Remove(taglist.Where((x) => x.Key == tag.Key).FirstOrDefault());
+                taglist.Remove(taglist.Where((x) => string.Equals(x.Key, tag.Key, StringComparison.OrdinalIgnoreCase)).FirstOrDefault());
                 taglist.Add(tag);
             });
 
@@ -592,6 +617,11 @@ namespace MyrinaUI.Services {
 
             flist.Add(f);
         }
+
+        private RegionEndpoint GetEndpoint(string zone) {
+            return RegionEndpoint.GetBySystemName(NormalizeZoneToEndpoint(zone));
+        }
+
         #endregion
     }
 }
