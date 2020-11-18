@@ -26,12 +26,22 @@ namespace MyrinaUI.Services {
         private string AccessKey = Settings.Current.AccessKey;
         private string SecretKey = Settings.Current.SecretKey;
 
+        public string NormalizeZoneToEndpoint(string zone) {
+            if (zone == null)
+                zone = "us-east-1a";
+
+            if (!char.IsDigit(zone[zone.Length - 1])) { zone = zone.Remove(zone.Length - 1, 1); }
+
+            return zone;
+        }
+
         public async Task<string> LaunchEC2Instance(string SAvailabilityZone, string SInstanceType, 
             string SSubnet, string SAmi, bool UsePublicIp, 
             ObservableCollection<SecurityGroup> sgroups, int startnum, Vpc vpc, 
-            KeyPairInfo key, ObservableCollection<Tag> tags = null) {
+            KeyPairInfo key, ObservableCollection<Tag> tags = null, string zone = "us-east-1") {
 
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             RunInstancesRequest req = new RunInstancesRequest();
             req.Placement = new Placement();
             req.Placement.AvailabilityZone = SAvailabilityZone;
@@ -72,8 +82,9 @@ namespace MyrinaUI.Services {
             return result;
         }
         
-        public async Task<string> TerminateEC2Instance(System.Collections.IList items) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<string> TerminateEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var req = new TerminateInstancesRequest();
 
             foreach (Instance i in items)
@@ -95,8 +106,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<string> StartEC2Instance(System.Collections.IList items) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<string> StartEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var req = new StartInstancesRequest();
 
             foreach (Instance i in items)
@@ -118,8 +130,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<string> StopEC2Instance(System.Collections.IList items) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<string> StopEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var req = new StopInstancesRequest();
 
             foreach (Instance i in items)
@@ -141,8 +154,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<string> RebootEC2Instance(System.Collections.IList items) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<string> RebootEC2Instance(System.Collections.IList items, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var req = new RebootInstancesRequest();
 
             foreach (Instance i in items)
@@ -182,8 +196,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2InstanceTags(Instance instance) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2InstanceTags(Instance instance, string zone = "us-east-1") {
+            NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _tags = new List<Tag>();
 
             var req = new DescribeTagsRequest();
@@ -211,8 +226,9 @@ namespace MyrinaUI.Services {
             return result;
         }
         
-        public async Task<int> GetEC2Instances(SourceList<Instance> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2Instances(SourceList<Instance> col, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _instances = new List<Instance>();
 
             DescribeInstancesRequest req = new DescribeInstancesRequest();
@@ -243,8 +259,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2SecurityGroups(ObservableCollection<SecurityGroup> col, Vpc vpc = null, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _groups = new List<SecurityGroup>();
             
             var req = new DescribeSecurityGroupsRequest();
@@ -274,8 +291,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2Vpcs(ObservableCollection<Vpc> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2Vpcs(ObservableCollection<Vpc> col, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _vpcs = new List<Vpc>();
             var req = new DescribeVpcsRequest();
             DescribeVpcsResponse resp;
@@ -313,42 +331,31 @@ namespace MyrinaUI.Services {
         }
 
         public async Task<int> GetEC2AvailabilityZones(ObservableCollection<string> col) {
-            var client1 = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
-            var client2 = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast2);
             var _zones = new List<string>();
 
-            var req = new DescribeAvailabilityZonesRequest();
-            DescribeAvailabilityZonesResponse resp;
+            // Regions that we're interested in.
+            RegionEndpoint[] regions = { RegionEndpoint.USEast1, RegionEndpoint.USEast2, RegionEndpoint.USWest1, RegionEndpoint.USWest2 };
 
-            var result = await Task.Run(async () => { 
-                try { resp = await client1.DescribeAvailabilityZonesAsync(req); }
-                catch (AmazonEC2Exception e) {
-                    throw e;
-                }
+            var result = await Task.Run(async () => {
+                foreach (var ep in regions) {
+                    var client = new AmazonEC2Client(AccessKey, SecretKey, ep);
+                    var req = new DescribeAvailabilityZonesRequest();
+                    DescribeAvailabilityZonesResponse resp;
 
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: DescribeAvailabilityZonesAsync() " +
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
-                }
+                    try { resp = await client.DescribeAvailabilityZonesAsync(req); }
+                    catch (AmazonEC2Exception e) {
+                        throw e;
+                    }
 
-                foreach (AvailabilityZone zone in resp.AvailabilityZones) {
-                    if (!_zones.Contains(zone.ZoneName) && zone.State.ToString() == "available")
-                        _zones.Add(zone.ZoneName);
-                }
-                
-                try { resp = await client2.DescribeAvailabilityZonesAsync(req); }
-                catch (AmazonEC2Exception e) {
-                    throw e;
-                }
+                    if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+                        throw new AmazonEC2Exception($"EC2 function: DescribeAvailabilityZonesAsync() " +
+                            $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
+                    }
 
-                if (resp.HttpStatusCode != System.Net.HttpStatusCode.OK) {
-                    throw new AmazonEC2Exception($"EC2 function: DescribeAvailabilityZonesAsync() " +
-                        $"failed with HTTP error: [{resp.HttpStatusCode.ToString()}]");
-                }
-
-                foreach (AvailabilityZone zone in resp.AvailabilityZones) {
-                    if (!_zones.Contains(zone.ZoneName) && zone.State.ToString() == "available")
-                        _zones.Add(zone.ZoneName);
+                    foreach (AvailabilityZone zone in resp.AvailabilityZones) {
+                        if (!_zones.Contains(zone.ZoneName) && zone.State.ToString() == "available")
+                            _zones.Add(zone.ZoneName);
+                    }
                 }
                 
                 return 0;
@@ -361,8 +368,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2InstanceStatus(ObservableCollection<InstanceStatus> col, Instance instance) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2InstanceStatus(ObservableCollection<InstanceStatus> col, Instance instance, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _status = new List<InstanceStatus>();
 
             var req = new DescribeInstanceStatusRequest();
@@ -392,8 +400,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2Subnets(ObservableCollection<Subnet> col, Vpc vpc = null, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _subnets = new List<Subnet>();
 
             var req = new DescribeSubnetsRequest();
@@ -434,8 +443,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-        public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+        public async Task<int> GetEC2KeyPairs(ObservableCollection<KeyPairInfo> col, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _pairs = new List<KeyPairInfo>();
 
             var req = new DescribeKeyPairsRequest();
@@ -463,8 +473,9 @@ namespace MyrinaUI.Services {
             return result;
         }
 
-         public async Task<int> GetEC2Images(ObservableCollection<Image> col) {
-            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.USEast1);
+         public async Task<int> GetEC2Images(ObservableCollection<Image> col, string zone = "us-east-1") {
+            zone = NormalizeZoneToEndpoint(zone);
+            var client = new AmazonEC2Client(AccessKey, SecretKey, RegionEndpoint.GetBySystemName(zone));
             var _images = new List<Image>();
 
             var req = new DescribeImagesRequest();

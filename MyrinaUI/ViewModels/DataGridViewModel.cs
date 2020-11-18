@@ -35,9 +35,24 @@ namespace MyrinaUI.ViewModels {
             set { this.RaiseAndSetIfChanged(ref _searchText, value); }
         }
 
+        private string _currentZone;
+        public string CurrentZone
+        {
+            get { return _currentZone; }
+            set { this.RaiseAndSetIfChanged(ref _currentZone, value);  }
+        }
+
         public DataGridViewModel() {
-            EventSystem.Subscribe<SettingsChanged>((x) => { RefreshEC2Instances(); });
-            EventSystem.Subscribe<RefreshInstanceList>(_ => { RefreshEC2Instances(); });
+            CurrentZone = "us-east-1";
+
+            EventSystem.Subscribe<SettingsChanged>((x) => {
+                CurrentZone = Settings.Current.Zone;
+                RefreshEC2Instances(); 
+            });
+            EventSystem.Subscribe<RefreshInstanceList>((x) => {
+                CurrentZone = x.value;
+                RefreshEC2Instances();
+            });
 
             this.WhenAnyValue(x => x.SInstance).Subscribe((x) => EventSystem.Publish(x));
 
@@ -82,7 +97,7 @@ namespace MyrinaUI.ViewModels {
                 return;
 
             Instance si = SInstance;
-            await EC2Service.Instance.GetEC2Instances(_sourceInstances)
+            await EC2Service.Instance.GetEC2Instances(_sourceInstances, CurrentZone)
                 .ContinueWith(_ => ResetSelectedInstance(si));
         }
 

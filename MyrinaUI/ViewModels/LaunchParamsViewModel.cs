@@ -84,6 +84,19 @@ namespace MyrinaUI.ViewModels {
 
             RefreshEC2AllData();
 
+            this.WhenAnyValue(x => x.SAvailabilityZone)
+                .Where(x => x != null)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(x => {
+                    RefreshEC2Images();
+                    RefreshEC2InstanceTypes();
+                    RefreshEC2Vpcs();
+                    RefreshEC2KeyPairInfo();
+
+                    EventSystem.Publish(new RefreshInstanceList() { value = x });
+                }
+            );
+
             this.WhenAnyValue(x => x.SVpc)
                 .Where(x => x != null)
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -107,7 +120,7 @@ namespace MyrinaUI.ViewModels {
                 var msg = await EC2Service.Instance.LaunchEC2Instance(SAvailabilityZone, SInstanceType,
                     SSubnet.SubnetId, SImage.ImageId, UsePublicIp, ActiveSecurityGroups,
                     StartNumber, SVpc, SKey, EC2Tags);
-                    EventSystem.Publish(new RefreshInstanceList());
+                    EventSystem.Publish(new RefreshInstanceList() { value = SAvailabilityZone });
                     LogViewModel.LogView.Log(msg);
             } 
             catch (Exception e) when 
@@ -133,7 +146,7 @@ namespace MyrinaUI.ViewModels {
         private async void RefreshAmazonData(AmazonRefreshCode code) {
             try {
                 if (code == AmazonRefreshCode.Vpcs || code == AmazonRefreshCode.All) {
-                    await EC2Service.Instance.GetEC2Vpcs(EC2Vpcs)
+                    await EC2Service.Instance.GetEC2Vpcs(EC2Vpcs, SAvailabilityZone)
                         .ContinueWith(_ => SVpc = SettingsFirstOrDefault(Settings.Current.Vpc, EC2Vpcs, "VpcId"));
                 }
                 if (code == AmazonRefreshCode.Zones || code == AmazonRefreshCode.All) {
@@ -145,20 +158,20 @@ namespace MyrinaUI.ViewModels {
                         .ContinueWith(_ => SInstanceType = SettingsFirstOrDefault(Settings.Current.InstanceType, EC2InstanceTypes));
                 }
                 if (code == AmazonRefreshCode.Subnets || code == AmazonRefreshCode.All) {
-                    await EC2Service.Instance.GetEC2Subnets(EC2Subnets, SVpc)
+                    await EC2Service.Instance.GetEC2Subnets(EC2Subnets, SVpc, SAvailabilityZone)
                         .ContinueWith(_ => SSubnet = SettingsFirstOrDefault("", EC2Subnets));
                 }
                 if (code == AmazonRefreshCode.SecurityGroups || code == AmazonRefreshCode.All) {
-                    await EC2Service.Instance.GetEC2SecurityGroups(EC2SecurityGroups, SVpc)
+                    await EC2Service.Instance.GetEC2SecurityGroups(EC2SecurityGroups, SVpc, SAvailabilityZone)
                         .ContinueWith(_ => SSecurityGroup = SettingsFirstOrDefault("", EC2SecurityGroups));
                 }
                 if (code == AmazonRefreshCode.KeyPairs || code == AmazonRefreshCode.All) {
-                    await EC2Service.Instance.GetEC2KeyPairs(EC2KeyPairs)
+                    await EC2Service.Instance.GetEC2KeyPairs(EC2KeyPairs, SAvailabilityZone)
                         .ContinueWith(_ => SKey = SettingsFirstOrDefault(Settings.Current.KeyPair, EC2KeyPairs, "KeyName"));
                 }
                 if (code == AmazonRefreshCode.Images || code == AmazonRefreshCode.All) {
                     // TODO: Pull these from the api
-                    await EC2Service.Instance.GetEC2Images(EC2Images);
+                    await EC2Service.Instance.GetEC2Images(EC2Images, SAvailabilityZone);
                     SImage = SettingsFirstOrDefault(Settings.Current.Image, EC2Images, "ImageId");
                 }
             } 
@@ -175,7 +188,7 @@ namespace MyrinaUI.ViewModels {
         public void RefreshEC2Vpcs() => RefreshAmazonData(AmazonRefreshCode.Vpcs);
         public void RefreshEC2Images() => RefreshAmazonData(AmazonRefreshCode.Images);
         public void RefreshEC2Subnets() => RefreshAmazonData(AmazonRefreshCode.Subnets);
-        public void RefreshKeyPairInfo() => RefreshAmazonData(AmazonRefreshCode.KeyPairs);
+        public void RefreshEC2KeyPairInfo() => RefreshAmazonData(AmazonRefreshCode.KeyPairs);
         public void RefreshEC2AllData() => RefreshAmazonData(AmazonRefreshCode.All);
 
         // Private helpers
