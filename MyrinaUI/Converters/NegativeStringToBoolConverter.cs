@@ -3,7 +3,7 @@ using Avalonia.Data.Converters;
 using System;
 
 namespace MyrinaUI.Converters {
-    // Another hack to work around a bug...fook me in the goat arse!
+    // Another hack to work around a bug
     public class NegativeStringToBoolConverter : IValueConverter {
         public object Convert(object value, Type targetType,
             object parameter, System.Globalization.CultureInfo culture) {
